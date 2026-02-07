@@ -20,58 +20,57 @@
 
         canvas { display: block; }
 
-        /* --- 시작 페이지 레이아웃 (수평 정렬) --- */
+        /* --- 시작 페이지 레이아웃 --- */
         #start-screen {
             position: absolute; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.05);
+            background-color: rgba(0, 0, 0, 0.03);
             display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100;
         }
 
-        #game-title { font-size: 36px; font-weight: 900; margin-bottom: 40px; color: #333; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
+        #game-title { font-size: 36px; font-weight: 900; margin-bottom: 40px; color: #333; }
 
         .mode-container {
             display: flex; flex-direction: row; gap: 25px; align-items: stretch; padding: 20px;
         }
 
-        /* --- 카드 스타일: 연한 회색, 불투명, 음영 --- */
+        /* --- 카드 스타일 --- */
         .mode-card {
-            width: 300px; background-color: rgba(240, 240, 240, 0.9);
-            border-radius: 20px; padding: 30px;
-            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            transition: transform 0.3s, box-shadow 0.3s;
-            position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.5);
+            width: 300px; background-color: rgba(245, 245, 245, 0.9);
+            border-radius: 20px; padding: 35px 25px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            position: relative; border: 1px solid rgba(0,0,0,0.05);
         }
 
-        .mode-card h2 { margin: 0 0 15px 0; font-size: 22px; color: #444; text-align: center; }
+        .mode-card h2 { margin: 0 0 20px 0; font-size: 22px; color: #222; text-align: center; }
 
-        /* 설명창 스타일 */
         .mode-desc {
-            font-size: 14px; color: #666; line-height: 1.6; text-align: center;
-            background: rgba(255, 255, 255, 0.8); padding: 15px; border-radius: 12px;
-            margin-bottom: 20px; opacity: 0; transform: translateY(10px); transition: 0.3s;
-            pointer-events: none; word-break: keep-all;
+            font-size: 14px; color: #555; line-height: 1.6; text-align: center;
+            margin-bottom: 25px; opacity: 0; transform: translateY(10px); transition: 0.3s;
+            pointer-events: none; word-break: keep-all; min-height: 80px;
+            display: flex; align-items: center;
         }
 
-        /* 시작하기 버튼 */
         .start-btn {
-            width: 100%; padding: 12px; font-size: 16px; font-weight: bold;
-            color: white; border: none; border-radius: 10px; cursor: pointer;
-            background-color: #4A90E2; transition: background 0.2s;
+            width: 100%; padding: 14px; font-size: 16px; font-weight: bold;
+            color: white; border: none; border-radius: 12px; cursor: pointer;
+            background-color: #444; 
+            transition: all 0.2s;
             opacity: 0; transform: translateY(10px); transition: 0.3s;
         }
 
-        /* PC 버전: 마우스 올리면(Hover) 설명과 버튼 등장 */
+        .start-btn:hover { background-color: #222; }
+
         @media (hover: hover) {
-            .mode-card:hover { transform: translateY(-10px); box-shadow: 0 15px 40px rgba(0,0,0,0.2); }
+            .mode-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.15); background-color: #fff; }
             .mode-card:hover .mode-desc, .mode-card:hover .start-btn { opacity: 1; transform: translateY(0); pointer-events: auto; }
         }
 
-        /* 모바일 버전: 클릭 시 활성화 클래스 */
+        .mode-card.active { transform: scale(1.03); background-color: #fff; border: 1px solid #444; }
         .mode-card.active .mode-desc, .mode-card.active .start-btn {
             opacity: 1; transform: translateY(0); pointer-events: auto;
         }
-        .mode-card.active { transform: scale(1.05); border: 2px solid #4A90E2; }
 
         /* UI 레이아웃 */
         #ui-container {
@@ -88,8 +87,7 @@
 
         @media (max-width: 700px) {
             .mode-container { flex-direction: column; }
-            .mode-card { width: 85vw; padding: 20px; }
-            #game-title { font-size: 28px; margin-bottom: 20px; }
+            .mode-card { width: 85vw; }
         }
     </style>
 </head>
@@ -106,11 +104,11 @@
             </div>
 
             <div class="mode-card" id="card-catch" onclick="handleCardClick(this)">
-                <h2>555명의 파이브를 잡아라!</h2>
+                <h2>215명의 파이브를 잡아라!</h2>
                 <div class="mode-desc">
-                    떨어지는 돌을 피해 파이브 555명을 상자 속으로 집어 넣으시면 됩니다. 돌에 닿으면 목숨이 깍이고 파이브 5명에게 닿으면 목숨이 늘어납니다!
+                    떨어지는 돌을 피해 파이브 215명을 상자 속으로 집어 넣으시면 됩니다. 돌에 닿으면 목숨이 깍이고 파이브 5명에게 닿으면 목숨이 늘어납니다!
                 </div>
-                <button class="start-btn" onclick="startGame('catch', event)" style="background-color: #E94E77;">시작하기</button>
+                <button class="start-btn" onclick="startGame('catch', event)">시작하기</button>
             </div>
         </div>
     </div>
@@ -143,21 +141,20 @@
         let lives = 3, heartPieces = 0, score = 0, isGameOver = false, isWin = false, isStarted = false;
         let lastTime = 0, objects = [], moveLeft = false, moveRight = false, keys = {};
         let gameMode = "";
-        let targetCatch = 555;
+        let targetCatch = 215; // ★ 목표 수치를 215로 변경
 
         let player = {
             x: canvas.width / 2 - 30, y: canvas.height - 140,
             width: 60, height: 80, speed: isMobile ? 13 : 15 
         };
 
-        // 카드 클릭 핸들러 (모바일용)
         function handleCardClick(card) {
             document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
             card.classList.add('active');
         }
 
         function startGame(mode, event) {
-            event.stopPropagation(); // 카드 클릭 이벤트와 겹치지 않게 방지
+            event.stopPropagation();
             gameMode = mode;
             document.getElementById("start-screen").style.display = "none";
             document.getElementById("ui-container").style.display = "flex";
