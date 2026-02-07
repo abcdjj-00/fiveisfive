@@ -162,11 +162,11 @@
         let targetCatch = 215;
         let targetSurvivalScore = 55555;
         let survivalDuration = 215; 
-        let survivalTimer = 0; // ★ 모든 모드 난이도의 기준이 됨
+        let survivalTimer = 0; 
 
         let player = {
             x: canvas.width / 2 - 30, y: canvas.height - 140,
-            width: 60, height: 80, speed: isMobile ? 13 : 15 
+            width: 60, height: 80, speed: isMobile ? 14 : 16 // 상자 속도도 소폭 상향
         };
 
         function handleCardClick(card) {
@@ -219,9 +219,10 @@
         window.addEventListener("touchend", () => { moveLeft = false; moveRight = false; });
 
         function createObject() {
-            const maxCount = isMobile ? 18 : 30;
-            // ★ 시간에 따라 물체가 더 자주 생성되도록 확률 보정 (기본 0.06 + 시간당 증가)
-            const spawnChance = (isMobile ? 0.06 : 0.08) + (survivalTimer * 0.0001);
+            // ★ 최대 물량 상향 (후반부 화면 가득히)
+            const maxCount = isMobile ? 22 : 35;
+            // ★ 생성 확률 증가 속도 상향
+            const spawnChance = (isMobile ? 0.07 : 0.09) + (survivalTimer * 0.0003);
 
             if (objects.length < maxCount && Math.random() < spawnChance) {
                 let type = Math.random() < 0.35 ? 'item' : 'obstacle';
@@ -231,8 +232,8 @@
                 
                 objects.push({
                     x: Math.random() * (canvas.width - w), y: -h, width: w, height: h,
-                    // ★ 핵심: score가 아닌 survivalTimer(실제 시간)에 비례하여 속도 상승
-                    speed: 6 + Math.random() * 10 + (survivalTimer * 0.1),
+                    // ★ 속도 증가폭 대폭 상향 (0.04 -> 0.15)
+                    speed: 8 + Math.random() * 6 + (survivalTimer * 0.15),
                     type: type, img: img
                 });
             }
@@ -241,7 +242,6 @@
         function update(deltaTime) {
             if (!isStarted || isGameOver || isWin) return;
 
-            // ★ 모든 모드에서 시간을 공평하게 누적
             survivalTimer += deltaTime / 1000; 
 
             if (gameMode === "survival") {
@@ -325,5 +325,3 @@
     </script>
 </body>
 </html>
-
-
