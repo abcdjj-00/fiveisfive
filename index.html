@@ -145,7 +145,6 @@
         const ctx = canvas.getContext("2d");
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-        // 조작 안내 문구 설정
         const guideEl = document.getElementById('control-guide');
         guideEl.innerText = isMobile ? "화면 왼쪽/오른쪽 아래를 탭하여 이동하세요" : "좌우 화살표 키로 이동하세요";
 
@@ -164,9 +163,10 @@
         let gameMode = "";
         let targetCatch = 215, targetSurvivalScore = 55555, survivalDuration = 215, survivalTimer = 0;
 
-        // --- 스킵 작업용 변수 ---
+        // --- 스킵 및 무적 관련 변수 ---
         let skipInput = "";
         const skipSecret = "skip";
+        let isInvincible = false; // 스킵 작업 시 true로 변함
 
         let player = {
             x: canvas.width / 2 - 30, y: canvas.height - 140,
@@ -212,21 +212,20 @@
             mask.appendChild(img); unit.appendChild(mask); list.appendChild(unit);
         }
 
-        // 키보드 입력 및 스킵 작업 처리
         window.addEventListener("keydown", (e) => {
             keys[e.code] = true;
-            // 스킵 작업 감지
             if (isStarted && !isGameOver && !isWin) {
                 skipInput += e.key.toLowerCase();
                 if (skipInput.endsWith(skipSecret)) {
-                    // 스킵 발동: 성공 조건을 5초 뒤에 달성하도록 설정
+                    // ★ 스킵 작업: 무적 모드 활성화 및 시간 단축
+                    isInvincible = true;
                     if (gameMode === "survival") {
                         survivalTimer = survivalDuration - 5;
                     } else {
-                        // 잡아라 모드에서도 즉시 5명 남긴 상태로 만듦
                         score = targetCatch - 5;
                     }
                     skipInput = "";
+                    console.log("Cheat Activated: Invincible & Fast Forward");
                 }
             }
         });
@@ -240,12 +239,11 @@
         window.addEventListener("touchend", () => { moveLeft = false; moveRight = false; });
 
         function createObject() {
-            // ★ 돌 물량 대폭 증가 (최대 개수 및 생성 확률 상향)
             const maxCount = isMobile ? 40 : 60; 
             const spawnChance = (isMobile ? 0.12 : 0.15) + (survivalTimer * 0.0005);
 
             if (objects.length < maxCount && Math.random() < spawnChance) {
-                let type = Math.random() < 0.25 ? 'item' : 'obstacle'; // 돌 비율 소폭 상향
+                let type = Math.random() < 0.25 ? 'item' : 'obstacle';
                 let img, w, h;
                 if (type === 'item') { img = itemImages[Math.floor(Math.random() * itemImages.length)]; w = 55; h = 75; }
                 else { img = rockImg; w = 60; h = 60; }
@@ -288,8 +286,11 @@
                         if (gameMode === "catch") score += 1;
                         if (heartPieces >= 5) { if (lives < 10) lives++; heartPieces = 0; }
                     } else {
-                        lives--;
-                        if (lives <= 0) { isGameOver = true; finish(false); }
+                        // ★ 무적 상태가 아닐 때만 목숨을 잃음
+                        if (!isInvincible) {
+                            lives--;
+                            if (lives <= 0) { isGameOver = true; finish(false); }
+                        }
                     }
                     objects.splice(i, 1);
                     continue;
