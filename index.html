@@ -58,12 +58,12 @@
             opacity: 0; transform: translateY(10px); transition: 0.3s;
         }
 
-        /* --- 결과 화면 (투명하게 어두운 배경 고정) --- */
+        /* --- 결과 화면 --- */
         #result-screen {
             position: absolute; width: 100%; height: 100%;
             display: none; flex-direction: column; justify-content: center; align-items: center;
             z-index: 200; color: white;
-            background-color: rgba(0, 0, 0, 0.7); /* 고정된 어두운 배경 */
+            background-color: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(8px);
         }
 
@@ -161,7 +161,8 @@
         let gameMode = "";
         let targetCatch = 215;
         let targetSurvivalScore = 55555;
-        let survivalDuration = 215; // 215초
+        let survivalDuration = 215; 
+        let survivalTimer = 0; // ★ 실제 흐른 시간 누적 변수
 
         let player = {
             x: canvas.width / 2 - 30, y: canvas.height - 140,
@@ -237,9 +238,15 @@
             if (!isStarted || isGameOver || isWin) return;
 
             if (gameMode === "survival") {
-                // 215초에 55555점이 되도록 속도 계산 (55555 / 215 = 약 258.395)
-                score += (deltaTime / 1000) * (targetSurvivalScore / survivalDuration);
-                if (score >= targetSurvivalScore) { score = targetSurvivalScore; isWin = true; finish(true); }
+                // ★ 프레임 드랍과 상관없이 실제 시계(deltaTime)를 누적하여 점수 계산
+                survivalTimer += deltaTime / 1000; 
+                score = (targetSurvivalScore / survivalDuration) * survivalTimer;
+
+                if (survivalTimer >= survivalDuration) { 
+                    score = targetSurvivalScore; 
+                    isWin = true; 
+                    finish(true); 
+                }
             } else {
                 if (score >= targetCatch) { score = targetCatch; isWin = true; finish(true); }
             }
@@ -257,7 +264,6 @@
                     
                     if (o.type === 'item') {
                         heartPieces++;
-                        // 아이템 점수 추가 제거 (오직 목숨만)
                         if (heartPieces >= 5) { if (lives < 10) lives++; heartPieces = 0; }
                     } else {
                         lives--;
@@ -280,7 +286,7 @@
                     msgEl.innerHTML = "성공<br>무사히 215초를 버텨냈어요!";
                     statsEl.innerText = ""; 
                 } else {
-                    msgEl.innerHTML = "성공<br>무사히 215명을 집어넣었어요!";
+                    msgEl.innerHTML = "성공<br>무사히 215명을 넣었어요!";
                     statsEl.innerText = "";
                 }
             } else {
@@ -300,8 +306,10 @@
 
         function gameLoop(timestamp) {
             if (!lastTime) lastTime = timestamp;
-            update(timestamp - lastTime);
+            const deltaTime = timestamp - lastTime;
             lastTime = timestamp;
+
+            update(deltaTime);
             draw();
             if (!isGameOver && !isWin) requestAnimationFrame(gameLoop);
         }
