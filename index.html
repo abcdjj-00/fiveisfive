@@ -126,7 +126,7 @@
     </div>
 
     <div id="result-screen">
-        <div id="result-msg">성공!! 축하합니다</div>
+        <div id="result-msg"></div>
         <div id="final-stats"></div>
         <button class="restart-btn" onclick="location.reload()">다시 시작하기</button>
     </div>
@@ -162,7 +162,7 @@
         let targetCatch = 215;
         let targetSurvivalScore = 55555;
         let survivalDuration = 215; 
-        let survivalTimer = 0; // ★ 실제 흐른 시간 누적 변수
+        let survivalTimer = 0; 
 
         let player = {
             x: canvas.width / 2 - 30, y: canvas.height - 140,
@@ -194,7 +194,10 @@
             if (gameMode === "survival") {
                 document.getElementById('stats-text').innerHTML = `SCORE: <span id="score-val">${scoreDisplay}</span>`;
             } else {
-                document.getElementById('stats-text').innerHTML = `남은 파이브: <span id="score-val">${targetCatch - scoreDisplay}</span>`;
+                // 잡기 모드에서는 '남은 수' 표시
+                let remaining = targetCatch - scoreDisplay;
+                if (remaining < 0) remaining = 0;
+                document.getElementById('stats-text').innerHTML = `남은 파이브: <span id="score-val">${remaining}</span>`;
             }
         }
 
@@ -228,7 +231,7 @@
                 
                 objects.push({
                     x: Math.random() * (canvas.width - w), y: -h, width: w, height: h,
-                    speed: 7 + Math.random() * 7 + (score * 0.0005),
+                    speed: 7 + Math.random() * 7 + (gameMode === "survival" ? (score * 0.0001) : (score * 0.005)),
                     type: type, img: img
                 });
             }
@@ -238,17 +241,20 @@
             if (!isStarted || isGameOver || isWin) return;
 
             if (gameMode === "survival") {
-                // ★ 프레임 드랍과 상관없이 실제 시계(deltaTime)를 누적하여 점수 계산
                 survivalTimer += deltaTime / 1000; 
                 score = (targetSurvivalScore / survivalDuration) * survivalTimer;
-
                 if (survivalTimer >= survivalDuration) { 
                     score = targetSurvivalScore; 
                     isWin = true; 
                     finish(true); 
                 }
             } else {
-                if (score >= targetCatch) { score = targetCatch; isWin = true; finish(true); }
+                // 잡기 모드 성공 판정
+                if (score >= targetCatch) { 
+                    score = targetCatch; 
+                    isWin = true; 
+                    finish(true); 
+                }
             }
 
             updateUI();
@@ -264,6 +270,10 @@
                     
                     if (o.type === 'item') {
                         heartPieces++;
+                        // ★ 잡기 모드인 경우에만 점수(구출 수)를 올립니다.
+                        if (gameMode === "catch") {
+                            score += 1;
+                        }
                         if (heartPieces >= 5) { if (lives < 10) lives++; heartPieces = 0; }
                     } else {
                         lives--;
