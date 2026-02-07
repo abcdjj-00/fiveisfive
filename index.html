@@ -57,7 +57,6 @@
             opacity: 0; transform: translateY(10px); transition: 0.3s;
         }
 
-        /* --- 조작 안내 문구 --- */
         #control-guide {
             position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
             background: rgba(0,0,0,0.6); color: white; padding: 10px 20px;
@@ -167,9 +166,13 @@
         const skipSecret = "skip";
         let isInvincible = false;
 
+        // ★ 기기별 상자(플레이어) 크기 설정
         let player = {
-            x: canvas.width / 2 - 30, y: canvas.height - 140,
-            width: 60, height: 80, speed: isMobile ? 14 : 16
+            x: canvas.width / 2 - (isMobile ? 20 : 30),
+            y: canvas.height - 140,
+            width: isMobile ? 40 : 60,
+            height: isMobile ? 40 : 60,
+            speed: isMobile ? 14 : 16
         };
 
         function handleCardClick(card) {
@@ -240,11 +243,12 @@
                 let type = Math.random() < 0.25 ? 'item' : 'obstacle';
                 let img, w, h;
                 
-                // ★ 모바일일 경우 오브젝트 사이즈를 30x30으로 축소
+                // ★ 기기별 오브젝트(파이브, 돌) 크기 설정
                 if (isMobile) {
-                    w = 30; h = 40;
+                    if (type === 'item') { w = 40; h = 60; }
+                    else { w = 40; h = 40; }
                 } else {
-                    if (type === 'item') { w = 55; h = 75; }
+                    if (type === 'item') { w = 60; h = 80; }
                     else { w = 60; h = 60; }
                 }
 
@@ -279,8 +283,8 @@
 
             for (let i = objects.length - 1; i >= 0; i--) {
                 let o = objects[i]; o.y += o.speed;
-                // 충돌 판정 여유폭 조정 (오브젝트가 작아졌으므로 판정 범위를 미세하게 줄임)
-                let padding = isMobile ? 5 : 15;
+                // 충돌 판정 여백
+                let padding = isMobile ? 5 : 10;
                 if (o.x < player.x + player.width - padding && o.x + o.width > player.x + padding &&
                     o.y < player.y + player.height - padding && o.y + o.height > player.y + padding) {
                     
