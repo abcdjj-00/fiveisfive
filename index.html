@@ -20,7 +20,7 @@
 
         canvas { display: block; }
 
-        /* --- 시작 페이지 레이아웃 --- */
+        /* --- 시작 페이지 --- */
         #start-screen {
             position: absolute; width: 100%; height: 100%;
             background-color: rgba(255, 255, 255, 0.95);
@@ -29,9 +29,7 @@
 
         #game-title { font-size: 36px; font-weight: 900; margin-bottom: 40px; color: #333; }
 
-        .mode-container {
-            display: flex; flex-direction: row; gap: 25px; align-items: stretch; padding: 20px;
-        }
+        .mode-container { display: flex; flex-direction: row; gap: 25px; align-items: stretch; padding: 20px; }
 
         .mode-card {
             width: 300px; background-color: rgba(245, 245, 245, 0.9);
@@ -40,6 +38,7 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             transition: all 0.3s ease;
             position: relative; border: 1px solid rgba(0,0,0,0.05);
+            cursor: pointer;
         }
 
         .mode-card h2 { margin: 0 0 20px 0; font-size: 22px; color: #222; text-align: center; }
@@ -58,13 +57,18 @@
             opacity: 0; transform: translateY(10px); transition: 0.3s;
         }
 
+        /* --- 조작 안내 문구 --- */
+        #control-guide {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.6); color: white; padding: 10px 20px;
+            border-radius: 20px; font-size: 14px; z-index: 150; pointer-events: none;
+        }
+
         /* --- 결과 화면 --- */
         #result-screen {
             position: absolute; width: 100%; height: 100%;
             display: none; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 200; color: white;
-            background-color: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(8px);
+            z-index: 200; color: white; background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px);
         }
 
         #result-msg { font-size: 40px; font-weight: 900; margin-bottom: 25px; text-align: center; line-height: 1.4; }
@@ -75,7 +79,6 @@
             background-color: white; color: #333; border: none; border-radius: 50px;
             cursor: pointer; transition: 0.2s;
         }
-        .restart-btn:active { transform: scale(0.9); }
 
         @media (hover: hover) {
             .mode-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.15); background-color: #fff; }
@@ -85,7 +88,6 @@
         .mode-card.active { transform: scale(1.03); background-color: #fff; border: 1px solid #444; }
         .mode-card.active .mode-desc, .mode-card.active .start-btn { opacity: 1; transform: translateY(0); pointer-events: auto; }
 
-        /* UI 레이아웃 */
         #ui-container {
             position: fixed; top: 15px; left: 15px;
             display: none; flex-direction: column; gap: 8px; pointer-events: none; z-index: 10;
@@ -110,19 +112,16 @@
         <div class="mode-container">
             <div class="mode-card" onclick="handleCardClick(this)">
                 <h2>215초를 버텨라!</h2>
-                <div class="mode-desc">
-                    215초 동안 떨어지는 돌을 피해 생존하시면 됩니다. 돌에 닿으면 목숨이 깍이고 파이브 5명에게 닿으면 목숨이 늘어납니다!
-                </div>
+                <div class="mode-desc">215초 동안 떨어지는 돌을 피해 생존하세요!</div>
                 <button class="start-btn" onclick="startGame('survival', event)">시작하기</button>
             </div>
             <div class="mode-card" onclick="handleCardClick(this)">
                 <h2>215명의 파이브를 잡아라!</h2>
-                <div class="mode-desc">
-                    떨어지는 돌을 피해 파이브 215명을 상자 속으로 집어 넣으시면 됩니다. 돌에 닿으면 목숨이 깍이고 파이브 5명에게 닿으면 목숨이 늘어납니다!
-                </div>
+                <div class="mode-desc">돌을 피해 파이브 215명을 상자 속으로 넣으세요!</div>
                 <button class="start-btn" onclick="startGame('catch', event)">시작하기</button>
             </div>
         </div>
+        <div id="control-guide"></div>
     </div>
 
     <div id="result-screen">
@@ -146,6 +145,10 @@
         const ctx = canvas.getContext("2d");
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
+        // 조작 안내 문구 설정
+        const guideEl = document.getElementById('control-guide');
+        guideEl.innerText = isMobile ? "화면 왼쪽/오른쪽 아래를 탭하여 이동하세요" : "좌우 화살표 키로 이동하세요";
+
         function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
         window.addEventListener('resize', resize);
         resize();
@@ -159,14 +162,15 @@
         let lives = 3, heartPieces = 0, score = 0, isGameOver = false, isWin = false, isStarted = false;
         let lastTime = 0, objects = [], moveLeft = false, moveRight = false, keys = {};
         let gameMode = "";
-        let targetCatch = 215;
-        let targetSurvivalScore = 55555;
-        let survivalDuration = 215; 
-        let survivalTimer = 0; 
+        let targetCatch = 215, targetSurvivalScore = 55555, survivalDuration = 215, survivalTimer = 0;
+
+        // --- 스킵 작업용 변수 ---
+        let skipInput = "";
+        const skipSecret = "skip";
 
         let player = {
             x: canvas.width / 2 - 30, y: canvas.height - 140,
-            width: 60, height: 80, speed: isMobile ? 14 : 16 // 상자 속도도 소폭 상향
+            width: 60, height: 80, speed: isMobile ? 14 : 16
         };
 
         function handleCardClick(card) {
@@ -195,8 +199,7 @@
                 document.getElementById('stats-text').innerHTML = `SCORE: <span id="score-val">${scoreDisplay}</span>`;
             } else {
                 let remaining = targetCatch - scoreDisplay;
-                if (remaining < 0) remaining = 0;
-                document.getElementById('stats-text').innerHTML = `남은 파이브: <span id="score-val">${remaining}</span>`;
+                document.getElementById('stats-text').innerHTML = `남은 파이브: <span id="score-val">${remaining < 0 ? 0 : remaining}</span>`;
             }
         }
 
@@ -209,8 +212,26 @@
             mask.appendChild(img); unit.appendChild(mask); list.appendChild(unit);
         }
 
-        window.addEventListener("keydown", (e) => keys[e.code] = true);
+        // 키보드 입력 및 스킵 작업 처리
+        window.addEventListener("keydown", (e) => {
+            keys[e.code] = true;
+            // 스킵 작업 감지
+            if (isStarted && !isGameOver && !isWin) {
+                skipInput += e.key.toLowerCase();
+                if (skipInput.endsWith(skipSecret)) {
+                    // 스킵 발동: 성공 조건을 5초 뒤에 달성하도록 설정
+                    if (gameMode === "survival") {
+                        survivalTimer = survivalDuration - 5;
+                    } else {
+                        // 잡아라 모드에서도 즉시 5명 남긴 상태로 만듦
+                        score = targetCatch - 5;
+                    }
+                    skipInput = "";
+                }
+            }
+        });
         window.addEventListener("keyup", (e) => keys[e.code] = false);
+
         window.addEventListener("touchstart", (e) => {
             if(!isStarted) return;
             const touchX = e.touches[0].clientX;
@@ -219,21 +240,19 @@
         window.addEventListener("touchend", () => { moveLeft = false; moveRight = false; });
 
         function createObject() {
-            // ★ 최대 물량 상향 (후반부 화면 가득히)
-            const maxCount = isMobile ? 22 : 35;
-            // ★ 생성 확률 증가 속도 상향
-            const spawnChance = (isMobile ? 0.07 : 0.09) + (survivalTimer * 0.0003);
+            // ★ 돌 물량 대폭 증가 (최대 개수 및 생성 확률 상향)
+            const maxCount = isMobile ? 40 : 60; 
+            const spawnChance = (isMobile ? 0.12 : 0.15) + (survivalTimer * 0.0005);
 
             if (objects.length < maxCount && Math.random() < spawnChance) {
-                let type = Math.random() < 0.35 ? 'item' : 'obstacle';
+                let type = Math.random() < 0.25 ? 'item' : 'obstacle'; // 돌 비율 소폭 상향
                 let img, w, h;
                 if (type === 'item') { img = itemImages[Math.floor(Math.random() * itemImages.length)]; w = 55; h = 75; }
                 else { img = rockImg; w = 60; h = 60; }
                 
                 objects.push({
                     x: Math.random() * (canvas.width - w), y: -h, width: w, height: h,
-                    // ★ 속도 증가폭 대폭 상향 (0.04 -> 0.15)
-                    speed: 8 + Math.random() * 6 + (survivalTimer * 0.15),
+                    speed: 8 + Math.random() * 6 + (survivalTimer * 0.16),
                     type: type, img: img
                 });
             }
@@ -247,16 +266,10 @@
             if (gameMode === "survival") {
                 score = (targetSurvivalScore / survivalDuration) * survivalTimer;
                 if (survivalTimer >= survivalDuration) { 
-                    score = targetSurvivalScore; 
-                    isWin = true; 
-                    finish(true); 
+                    score = targetSurvivalScore; isWin = true; finish(true); 
                 }
             } else {
-                if (score >= targetCatch) { 
-                    score = targetCatch; 
-                    isWin = true; 
-                    finish(true); 
-                }
+                if (score >= targetCatch) { score = targetCatch; isWin = true; finish(true); }
             }
 
             updateUI();
@@ -293,16 +306,14 @@
             if (victory) {
                 if (gameMode === "survival") {
                     msgEl.innerHTML = "성공<br>무사히 215초를 버텨냈어요!";
-                    statsEl.innerText = ""; 
                 } else {
                     msgEl.innerHTML = "성공<br>무사히 215명을 넣었어요!";
-                    statsEl.innerText = "";
                 }
+                statsEl.innerText = ""; 
             } else {
                 msgEl.innerText = "게임 오버!";
                 statsEl.innerText = gameMode === "survival" ? `기록: ${Math.floor(score)}점` : `구출한 파이브: ${Math.floor(score)}명`;
             }
-
             screen.style.display = "flex";
         }
 
@@ -317,7 +328,6 @@
             if (!lastTime) lastTime = timestamp;
             const deltaTime = timestamp - lastTime;
             lastTime = timestamp;
-
             update(deltaTime);
             draw();
             if (!isGameOver && !isWin) requestAnimationFrame(gameLoop);
