@@ -23,7 +23,7 @@
         /* --- 시작 페이지 레이아웃 --- */
         #start-screen {
             position: absolute; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.03);
+            background-color: rgba(255, 255, 255, 0.95);
             display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100;
         }
 
@@ -33,7 +33,6 @@
             display: flex; flex-direction: row; gap: 25px; align-items: stretch; padding: 20px;
         }
 
-        /* --- 카드 스타일 --- */
         .mode-card {
             width: 300px; background-color: rgba(245, 245, 245, 0.9);
             border-radius: 20px; padding: 35px 25px;
@@ -55,40 +54,36 @@
         .start-btn {
             width: 100%; padding: 14px; font-size: 16px; font-weight: bold;
             color: white; border: none; border-radius: 12px; cursor: pointer;
-            background-color: #444; 
-            transition: all 0.2s;
+            background-color: #444; transition: all 0.2s;
             opacity: 0; transform: translateY(10px); transition: 0.3s;
         }
 
-        /* --- 커스텀 결과 화면 (결과창) --- */
+        /* --- 결과 화면 (투명하게 어두운 배경 고정) --- */
         #result-screen {
             position: absolute; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.6); /* 배경 어둡게 */
-            display: none; /* 평소엔 숨김 */
-            flex-direction: column; justify-content: center; align-items: center;
+            display: none; flex-direction: column; justify-content: center; align-items: center;
             z-index: 200; color: white;
-            backdrop-filter: blur(5px); /* 배경 흐리게 */
+            background-color: rgba(0, 0, 0, 0.7); /* 고정된 어두운 배경 */
+            backdrop-filter: blur(8px);
         }
 
-        #result-msg { font-size: 40px; font-weight: bold; margin-bottom: 20px; text-align: center; }
-        #final-stats { font-size: 20px; margin-bottom: 30px; color: #ddd; }
+        #result-msg { font-size: 40px; font-weight: 900; margin-bottom: 25px; text-align: center; line-height: 1.4; }
+        #final-stats { font-size: 20px; margin-bottom: 35px; color: rgba(255, 255, 255, 0.8); }
+        
         .restart-btn {
-            padding: 15px 40px; font-size: 18px; font-weight: bold;
+            padding: 16px 45px; font-size: 18px; font-weight: bold;
             background-color: white; color: #333; border: none; border-radius: 50px;
             cursor: pointer; transition: 0.2s;
         }
         .restart-btn:active { transform: scale(0.9); }
 
-        /* PC 버전 상호작용 */
         @media (hover: hover) {
             .mode-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.15); background-color: #fff; }
             .mode-card:hover .mode-desc, .mode-card:hover .start-btn { opacity: 1; transform: translateY(0); pointer-events: auto; }
         }
 
         .mode-card.active { transform: scale(1.03); background-color: #fff; border: 1px solid #444; }
-        .mode-card.active .mode-desc, .mode-card.active .start-btn {
-            opacity: 1; transform: translateY(0); pointer-events: auto;
-        }
+        .mode-card.active .mode-desc, .mode-card.active .start-btn { opacity: 1; transform: translateY(0); pointer-events: auto; }
 
         /* UI 레이아웃 */
         #ui-container {
@@ -132,7 +127,7 @@
 
     <div id="result-screen">
         <div id="result-msg">성공!! 축하합니다</div>
-        <div id="final-stats">SCORE: 0</div>
+        <div id="final-stats"></div>
         <button class="restart-btn" onclick="location.reload()">다시 시작하기</button>
     </div>
 
@@ -165,6 +160,8 @@
         let lastTime = 0, objects = [], moveLeft = false, moveRight = false, keys = {};
         let gameMode = "";
         let targetCatch = 215;
+        let targetSurvivalScore = 55555;
+        let survivalDuration = 215; // 215초
 
         let player = {
             x: canvas.width / 2 - 30, y: canvas.height - 140,
@@ -240,10 +237,11 @@
             if (!isStarted || isGameOver || isWin) return;
 
             if (gameMode === "survival") {
-                score += (deltaTime / 1000) * 5;
-                if (score >= 55555) { score = 55555; isWin = true; finish("성공!! 축하합니다"); }
+                // 215초에 55555점이 되도록 속도 계산 (55555 / 215 = 약 258.395)
+                score += (deltaTime / 1000) * (targetSurvivalScore / survivalDuration);
+                if (score >= targetSurvivalScore) { score = targetSurvivalScore; isWin = true; finish(true); }
             } else {
-                if (score >= targetCatch) { score = targetCatch; isWin = true; finish("성공!! 축하합니다"); }
+                if (score >= targetCatch) { score = targetCatch; isWin = true; finish(true); }
             }
 
             updateUI();
@@ -259,11 +257,11 @@
                     
                     if (o.type === 'item') {
                         heartPieces++;
-                        score += (gameMode === "survival" ? 30 : 1);
+                        // 아이템 점수 추가 제거 (오직 목숨만)
                         if (heartPieces >= 5) { if (lives < 10) lives++; heartPieces = 0; }
                     } else {
                         lives--;
-                        if (lives <= 0) { isGameOver = true; finish("게임 오버!"); }
+                        if (lives <= 0) { isGameOver = true; finish(false); }
                     }
                     objects.splice(i, 1);
                     continue;
@@ -272,22 +270,25 @@
             }
         }
 
-        // ★ 결과 알림창 대신 화면에 띄우는 함수
-        function finish(msg) {
+        function finish(victory) {
             const screen = document.getElementById("result-screen");
             const msgEl = document.getElementById("result-msg");
             const statsEl = document.getElementById("final-stats");
 
-            msgEl.innerText = msg;
-            
-            // 결과에 따른 통계 표시
-            if (gameMode === "survival") {
-                statsEl.innerText = `최종 점수: ${Math.floor(score)}`;
+            if (victory) {
+                if (gameMode === "survival") {
+                    msgEl.innerHTML = "성공<br>무사히 215초를 버텨냈어요!";
+                    statsEl.innerText = ""; 
+                } else {
+                    msgEl.innerHTML = "성공<br>무사히 215명을 집어넣었어요!";
+                    statsEl.innerText = "";
+                }
             } else {
-                statsEl.innerText = isWin ? "215명을 모두 구출했습니다!" : `구출한 파이브: ${Math.floor(score)}명`;
+                msgEl.innerText = "게임 오버!";
+                statsEl.innerText = gameMode === "survival" ? `기록: ${Math.floor(score)}점` : `구출한 파이브: ${Math.floor(score)}명`;
             }
 
-            screen.style.display = "flex"; // 결과 화면 노출
+            screen.style.display = "flex";
         }
 
         function draw() {
