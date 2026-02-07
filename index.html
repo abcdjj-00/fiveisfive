@@ -60,8 +60,26 @@
             opacity: 0; transform: translateY(10px); transition: 0.3s;
         }
 
-        .start-btn:hover { background-color: #222; }
+        /* --- 커스텀 결과 화면 (결과창) --- */
+        #result-screen {
+            position: absolute; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.6); /* 배경 어둡게 */
+            display: none; /* 평소엔 숨김 */
+            flex-direction: column; justify-content: center; align-items: center;
+            z-index: 200; color: white;
+            backdrop-filter: blur(5px); /* 배경 흐리게 */
+        }
 
+        #result-msg { font-size: 40px; font-weight: bold; margin-bottom: 20px; text-align: center; }
+        #final-stats { font-size: 20px; margin-bottom: 30px; color: #ddd; }
+        .restart-btn {
+            padding: 15px 40px; font-size: 18px; font-weight: bold;
+            background-color: white; color: #333; border: none; border-radius: 50px;
+            cursor: pointer; transition: 0.2s;
+        }
+        .restart-btn:active { transform: scale(0.9); }
+
+        /* PC 버전 상호작용 */
         @media (hover: hover) {
             .mode-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.15); background-color: #fff; }
             .mode-card:hover .mode-desc, .mode-card:hover .start-btn { opacity: 1; transform: translateY(0); pointer-events: auto; }
@@ -95,15 +113,14 @@
     <div id="start-screen">
         <div id="game-title">파이브와 돌</div>
         <div class="mode-container">
-            <div class="mode-card" id="card-survival" onclick="handleCardClick(this)">
+            <div class="mode-card" onclick="handleCardClick(this)">
                 <h2>215초를 버텨라!</h2>
                 <div class="mode-desc">
                     215초 동안 떨어지는 돌을 피해 생존하시면 됩니다. 돌에 닿으면 목숨이 깍이고 파이브 5명에게 닿으면 목숨이 늘어납니다!
                 </div>
                 <button class="start-btn" onclick="startGame('survival', event)">시작하기</button>
             </div>
-
-            <div class="mode-card" id="card-catch" onclick="handleCardClick(this)">
+            <div class="mode-card" onclick="handleCardClick(this)">
                 <h2>215명의 파이브를 잡아라!</h2>
                 <div class="mode-desc">
                     떨어지는 돌을 피해 파이브 215명을 상자 속으로 집어 넣으시면 됩니다. 돌에 닿으면 목숨이 깍이고 파이브 5명에게 닿으면 목숨이 늘어납니다!
@@ -111,6 +128,12 @@
                 <button class="start-btn" onclick="startGame('catch', event)">시작하기</button>
             </div>
         </div>
+    </div>
+
+    <div id="result-screen">
+        <div id="result-msg">성공!! 축하합니다</div>
+        <div id="final-stats">SCORE: 0</div>
+        <button class="restart-btn" onclick="location.reload()">다시 시작하기</button>
     </div>
 
     <div id="ui-container">
@@ -141,7 +164,7 @@
         let lives = 3, heartPieces = 0, score = 0, isGameOver = false, isWin = false, isStarted = false;
         let lastTime = 0, objects = [], moveLeft = false, moveRight = false, keys = {};
         let gameMode = "";
-        let targetCatch = 215; // ★ 목표 수치를 215로 변경
+        let targetCatch = 215;
 
         let player = {
             x: canvas.width / 2 - 30, y: canvas.height - 140,
@@ -169,10 +192,11 @@
             for (let i = 0; i < lives; i++) addHeartToUI(100);
             if (lives < 10 && (heartPieces > 0 || lives === 0)) addHeartToUI((heartPieces / 5) * 100);
 
+            const scoreDisplay = Math.floor(score);
             if (gameMode === "survival") {
-                document.getElementById('stats-text').innerHTML = `SCORE: <span id="score-val">${Math.floor(score)}</span>`;
+                document.getElementById('stats-text').innerHTML = `SCORE: <span id="score-val">${scoreDisplay}</span>`;
             } else {
-                document.getElementById('stats-text').innerHTML = `남은 파이브: <span id="score-val">${targetCatch - score}</span>`;
+                document.getElementById('stats-text').innerHTML = `남은 파이브: <span id="score-val">${targetCatch - scoreDisplay}</span>`;
             }
         }
 
@@ -248,9 +272,22 @@
             }
         }
 
+        // ★ 결과 알림창 대신 화면에 띄우는 함수
         function finish(msg) {
-            updateUI();
-            setTimeout(() => { alert(msg); location.reload(); }, 100);
+            const screen = document.getElementById("result-screen");
+            const msgEl = document.getElementById("result-msg");
+            const statsEl = document.getElementById("final-stats");
+
+            msgEl.innerText = msg;
+            
+            // 결과에 따른 통계 표시
+            if (gameMode === "survival") {
+                statsEl.innerText = `최종 점수: ${Math.floor(score)}`;
+            } else {
+                statsEl.innerText = isWin ? "215명을 모두 구출했습니다!" : `구출한 파이브: ${Math.floor(score)}명`;
+            }
+
+            screen.style.display = "flex"; // 결과 화면 노출
         }
 
         function draw() {
