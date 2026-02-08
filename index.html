@@ -225,7 +225,7 @@
         function pauseGame() {
             if (!isStarted || isGameOver || isWin || isPaused) return;
             isPaused = true;
-            showPopup("잠시 멈춤", "게임을 계속하시겠습니까?", true);
+            showPopup("잠시 멈춤", true);
         }
 
         function continueGame() {
@@ -398,4 +398,5 @@
     </script>
 </body>
 </html>
+
 
