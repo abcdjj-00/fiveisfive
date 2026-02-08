@@ -148,13 +148,12 @@
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
         // --- 사운드 설정 ---
-        const itemSounds = [new Audio('15.mp3'), new Audio('25.mp3')];
-        const rockSounds = [new Audio('1s.mp3'), new Audio('2s.mp3')];
+        const hitSound = new Audio('25.mp3');    // 모든 충돌용
+        const gameOverSound = new Audio('2s.mp3'); // 게임 오버 전용
 
-        function playRandomSound(soundArray) {
-            const sound = soundArray[Math.floor(Math.random() * soundArray.length)];
-            sound.currentTime = 0; // 재생 중이더라도 처음부터 다시 재생
-            sound.play().catch(e => console.log("사운드 재생 실패: ", e));
+        function playSound(sound) {
+            sound.currentTime = 0;
+            sound.play().catch(e => console.log("사운드 재생 실패"));
         }
 
         function loadImg(src) { const img = new Image(); img.src = src; return img; }
@@ -351,16 +350,22 @@
                 let o = objects[i]; o.y += o.speed;
                 let pad = isMobile ? 8 : 12;
                 if (o.x < player.x + player.width - pad && o.x + o.width > player.x + pad && o.y < player.y + player.height - pad && o.y + o.height > player.y + pad) {
+                    
+                    playSound(hitSound); // 모든 충돌 시 25.mp3 재생
+
                     if (o.type === 'item') { 
-                        playRandomSound(itemSounds); // 파이브 획득 사운드
                         heartPieces++; 
                         score++; 
                         if (heartPieces >= 5) { if (lives < 10) lives++; heartPieces = 0; } 
                     }
                     else if (!isInvincible && continueInvincibleTimer <= 0) { 
-                        playRandomSound(rockSounds); // 돌 충돌 사운드
                         lives--; 
-                        if (lives <= 0) { isGameOver = true; isWin = false; finish(false); } 
+                        if (lives <= 0) { 
+                            isGameOver = true; 
+                            isWin = false; 
+                            playSound(gameOverSound); // 게임 오버 시 2s.mp3 재생
+                            finish(false); 
+                        } 
                     }
                     objects.splice(i, 1); continue;
                 }
