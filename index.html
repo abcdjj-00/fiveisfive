@@ -323,7 +323,7 @@
                 attempts++;
             }
             let baseSpeed = isMobile ? 4.5 : 6;
-            let finalSpeed = Math.min(baseSpeed + (survivalTimer * 0.1), 40) + (Math.random() * 3);
+            let finalSpeed = Math.min(baseSpeed + (survivalTimer * 0.15), 40) + (Math.random() * 3);
             objects.push({ x: xPos, y: -h, width: w, height: h, speed: finalSpeed, type: type, img: (type === 'item') ? itemImages[Math.floor(Math.random() * itemImages.length)] : rockImg });
         }
 
@@ -408,5 +408,6 @@
     </script>
 </body>
 </html>
+
 
 
