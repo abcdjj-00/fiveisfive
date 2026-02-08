@@ -126,7 +126,7 @@
     </div>
 
     <div id="ui-container">
-        <div id="mode-label" class="label-text">상태</div>
+        <div id="mode-label" class="label-text">목숨</div>
         <div id="heart-list"></div>
         <div class="stats-row" id="stats-text">SCORE: 0</div>
     </div>
@@ -262,7 +262,7 @@ function createObject() {
         objects.push({
             x: xPos, y: -h, width: w, height: h,
             // 속도를 살짝 낮춤 (기본 7 -> 5)
-            speed: (isMobile ? 5 : 7) + Math.random() * 5 + (survivalTimer * 0.1),
+            speed: (isMobile ? 5 : 7) + Math.random() * 5 + (survivalTimer * 0.07),
             type: type, 
             img: (type === 'item') ? itemImages[Math.floor(Math.random() * itemImages.length)] : rockImg
         });
@@ -337,4 +337,5 @@ let pad = isMobile ? 8 : 12; // 숫자가 클수록 플레이어에게 유리해
     </script>
 </body>
 </html>
+
 
