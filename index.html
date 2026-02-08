@@ -55,13 +55,6 @@
             background-color: #444; opacity: 0; transform: translateY(10px); transition: 0.3s;
         }
 
-        #control-guide {
-            position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%);
-            background: rgba(0,0,0,0.6); color: white; padding: 10px 20px;
-            border-radius: 25px; font-size: 13px; z-index: 150; pointer-events: none;
-            white-space: nowrap;
-        }
-
         /* --- 결과 및 일시정지 화면 --- */
         #result-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -72,13 +65,14 @@
         #result-msg { font-size: 24px; font-weight: 800; margin-bottom: 20px; text-align: center; line-height: 1.5; padding: 0 20px; word-break: keep-all; }
         #final-stats { font-size: 18px; margin-bottom: 30px; color: rgba(255, 255, 255, 0.8); }
         
+        /* 버튼 배치: 왼쪽 메인(다시/이어하기), 오른쪽 서브(모드선택) */
         .btn-group { display: flex; gap: 15px; flex-direction: row; }
         .result-btn { 
             padding: 15px 30px; font-size: 16px; font-weight: bold; border-radius: 50px; 
             border: none; cursor: pointer; transition: 0.2s; min-width: 140px;
         }
-        .btn-main { background-color: white; color: #333; order: 1; } /* 왼쪽 배치 */
-        .btn-sub { background-color: rgba(255,255,255,0.2); color: white; border: 1px solid white; order: 2; } /* 오른쪽 배치 */
+        .btn-main { background-color: white; color: #333; order: 1; }
+        .btn-sub { background-color: rgba(255,255,255,0.2); color: white; border: 1px solid white; order: 2; }
 
         /* 상단 UI 및 멈추기 버튼 */
         #ui-container {
@@ -88,7 +82,7 @@
 
         #pause-btn {
             position: fixed; top: 15px; right: 15px;
-            width: 44px; height: 44px; background: rgba(0,0,0,0.1);
+            width: 44px; height: 44px; background: rgba(255,255,255,0.5);
             border: 2px solid #333; border-radius: 12px;
             display: none; justify-content: center; align-items: center;
             cursor: pointer; z-index: 150; font-size: 20px; font-weight: bold; color: #333;
@@ -125,7 +119,6 @@
                 <button class="start-btn" onclick="startGame('catch', event)">시작하기</button>
             </div>
         </div>
-        <div id="control-guide"></div>
     </div>
 
     <div id="pause-btn" onclick="pauseGame()">⏸</div>
@@ -201,6 +194,7 @@
             objects = []; lastTime = 0; continueInvincibleTimer = 0;
         }
 
+        // 멈추기 기능
         function pauseGame() {
             if (!isStarted || isGameOver || isWin || isPaused) return;
             isPaused = true;
@@ -208,6 +202,7 @@
             const btnGroup = document.getElementById("result-btns");
             document.getElementById("result-msg").innerHTML = "잠시 멈춤";
             document.getElementById("final-stats").innerText = "게임을 계속하시겠습니까?";
+            
             btnGroup.innerHTML = `
                 <button class="result-btn btn-main" onclick="continueGame()">이어하기</button>
                 <button class="result-btn btn-sub" onclick="location.reload()">모드선택</button>
@@ -217,10 +212,11 @@
 
         function continueGame() {
             isWin = false; isGameOver = false; isPaused = false;
-            isContinued = true; isInvincible = false;
+            isContinued = true; 
+            isInvincible = false; // 치트 무적 해제
             document.getElementById("result-screen").style.display = "none";
-            continueInvincibleTimer = 3; 
-            lastTime = performance.now(); // 시간 보정
+            continueInvincibleTimer = 3; // 3초 무적 부여
+            lastTime = performance.now(); 
             requestAnimationFrame(gameLoop);
         }
 
@@ -293,7 +289,8 @@
                 xPos = Math.random() * (canvas.width - w);
                 attempts++;
             }
-            let baseSpeed = isMobile ? 4.5 : 6, accelRate = isMobile ? 0.05 : 0.12;
+            let baseSpeed = isMobile ? 4.5 : 6;
+            let accelRate = isMobile ? 0.05 : 0.12; // PC 가속도 더 빠름
             let finalSpeed = Math.min(baseSpeed + (survivalTimer * accelRate), 40) + (Math.random() * 3);
             objects.push({ x: xPos, y: -h, width: w, height: h, speed: finalSpeed, type: type, img: (type === 'item') ? itemImages[Math.floor(Math.random() * itemImages.length)] : rockImg });
         }
@@ -322,7 +319,13 @@
                 let pad = isMobile ? 8 : 12;
                 if (o.x < player.x + player.width - pad && o.x + o.width > player.x + pad && o.y < player.y + player.height - pad && o.y + o.height > player.y + pad) {
                     if (o.type === 'item') { heartPieces++; score++; if (heartPieces >= 5) { if (lives < 10) lives++; heartPieces = 0; } }
-                    else if (!isInvincible && continueInvincibleTimer <= 0) { lives--; if (lives <= 0) { isGameOver = true; isWin = false; finish(false); } }
+                    else {
+                        // 3초 무적 혹은 치트 무적 상태면 목숨 안 깎임
+                        if (!isInvincible && continueInvincibleTimer <= 0) { 
+                            lives--; 
+                            if (lives <= 0) { isGameOver = true; isWin = false; finish(false); } 
+                        }
+                    }
                     objects.splice(i, 1); continue;
                 }
                 if (o.y > canvas.height) objects.splice(i, 1);
@@ -334,6 +337,7 @@
             const btnGroup = document.getElementById("result-btns");
             btnGroup.innerHTML = ''; 
             if (victory) {
+                // 모드별 성공 문구 수정
                 document.getElementById("result-msg").innerHTML = (gameMode === 'catch') ? "무사히 215명의 파이브를 상자 속으로 집어 넣었어요!" : "무사히 215초를 버텨냈어요!";
                 document.getElementById("final-stats").innerText = "";
                 btnGroup.innerHTML = `
@@ -354,7 +358,7 @@
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             if (!isStarted) return;
-            // 무적 상태 깜빡임 제거 (그냥 그림)
+            // 무적 시간 동안 깜빡임 효과 제거됨 (평소와 동일하게 그림)
             if (playerImg.complete) ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
             objects.forEach(o => { if (o.img.complete) ctx.drawImage(o.img, o.x, o.y, o.width, o.height); });
         }
