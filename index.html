@@ -19,7 +19,7 @@
             position: fixed; top: 0; left: 0;
         }
 
-        canvas { display: block; width: 100%; height: 100%; }
+        canvas { display: block; }
 
         /* --- 시작 페이지 --- */
         #start-screen {
@@ -138,38 +138,41 @@
         const ctx = canvas.getContext("2d");
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-        document.getElementById('control-guide').innerText = isMobile ? "하단 좌/우 영역을 터치해 움직이세요" : "좌우 화살표 키로 움직이세요";
-
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            if (player) {
-                player.y = canvas.height - (isMobile ? 110 : 140);
-            }
-        }
-        window.addEventListener('resize', resize);
-
+        // 이미지 로드
         function loadImg(src) { const img = new Image(); img.src = src; return img; }
         const playerImg = loadImg('box.png'); 
         const itemImages = [loadImg('1.5p.jpg'), loadImg('2.5p.jpg'), loadImg('4.5.png'), loadImg('5.5.png')];
         const rockImg = loadImg('s.png');
         const heartImgSrc = '3.5.png'; 
 
+        // 게임 변수
         let lives = 3, heartPieces = 0, score = 0, isGameOver = false, isWin = false, isStarted = false;
         let lastTime = 0, objects = [], moveLeft = false, moveRight = false, keys = {};
         let gameMode = "", survivalTimer = 0;
-        const targetCatch = 215, targetSurvivalScore = 55555, survivalDuration = 215;
+        const targetCatch = 215, survivalDuration = 215, targetSurvivalScore = 55555;
+        let skipInput = "", isInvincible = false;
 
-        let skipInput = "";
-        let isInvincible = false;
-
+        // 플레이어 초기화
         let player = {
-            x: window.innerWidth / 2 - (isMobile ? 15 : 30),
-            y: window.innerHeight - (isMobile ? 110 : 140),
+            x: 0, y: 0, 
             width: isMobile ? 30 : 60,
             height: isMobile ? 30 : 60,
             speed: isMobile ? 11 : 16 
         };
+
+        // 가이드 문구 설정
+        document.getElementById('control-guide').innerText = isMobile ? "하단 좌/우 영역을 터치해 움직이세요" : "좌우 화살표 키로 움직이세요";
+
+        // 화면 크기 조절 함수 (중복 제거 및 통합)
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            player.x = canvas.width / 2 - player.width / 2;
+            player.y = canvas.height - (isMobile ? 110 : 140);
+        }
+
+        window.addEventListener('resize', resize);
+        resize(); // 페이지 로드 시 최초 1회 실행
 
         function handleCardClick(card) {
             document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
@@ -178,7 +181,7 @@
 
         function startGame(mode, event) {
             event.stopPropagation();
-            resize(); // 시작 시 크기 재계산
+            resize(); // 시작 시점에 한 번 더 위치를 잡음
             gameMode = mode;
             document.getElementById("start-screen").style.display = "none";
             document.getElementById("ui-container").style.display = "flex";
@@ -212,6 +215,7 @@
             document.getElementById('heart-list').appendChild(unit);
         }
 
+        // 입력 처리
         window.addEventListener("keydown", (e) => {
             keys[e.code] = true;
             if (isStarted && !isGameOver) {
@@ -233,6 +237,7 @@
         }, {passive: false});
         window.addEventListener("touchend", () => { moveLeft = false; moveRight = false; });
 
+        // 오브젝트 생성
         function createObject() {
             const maxCount = isMobile ? 30 : 60; 
             const spawnChance = (isMobile ? 0.08 : 0.15) + (survivalTimer * 0.0005);
@@ -245,7 +250,7 @@
                 let xPos = Math.random() * (canvas.width - w);
                 let attempts = 0;
                 while (attempts < 5) {
-                    let overlap = objects.some(o => o.y < 100 && xPos < o.x + o.width + 15 && xPos + w > o.x - 15);
+                    let overlap = objects.some(o => o.y < 120 && xPos < o.x + o.width + 15 && xPos + w > o.x - 15);
                     if (!overlap) break;
                     xPos = Math.random() * (canvas.width - w);
                     attempts++;
@@ -259,6 +264,7 @@
             }
         }
 
+        // 게임 업데이트
         function update(deltaTime) {
             if (!isStarted || isGameOver || isWin) return;
             survivalTimer += deltaTime / 1000; 
@@ -318,8 +324,6 @@
             draw();
             if (!isGameOver && !isWin) requestAnimationFrame(gameLoop);
         }
-
-        resize();
     </script>
 </body>
 </html>
