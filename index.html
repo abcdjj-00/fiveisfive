@@ -128,8 +128,7 @@
     <div id="result-screen">
         <div id="result-msg"></div>
         <div id="final-stats"></div>
-        <div class="btn-group" id="result-btns">
-            </div>
+        <div class="btn-group" id="result-btns"></div>
     </div>
 
     <div id="ui-container">
@@ -157,7 +156,7 @@
         const targetCatch = 215, survivalDuration = 215, targetSurvivalScore = 55555;
         
         let skipInput = "", isInvincible = false;
-        let continueInvincibleTimer = 0; // 이어하기용 무적 타이머
+        let continueInvincibleTimer = 0; 
 
         let player = {
             x: 0, y: 0, 
@@ -189,9 +188,7 @@
             document.getElementById("start-screen").style.display = "none";
             document.getElementById("result-screen").style.display = "none";
             document.getElementById("ui-container").style.display = "flex";
-            isStarted = true;
-            isGameOver = false;
-            isWin = false;
+            isStarted = true; isGameOver = false; isWin = false;
             updateUI();
             requestAnimationFrame(gameLoop);
         }
@@ -201,12 +198,10 @@
             objects = []; lastTime = 0; continueInvincibleTimer = 0;
         }
 
-        // 이어하기 함수
         function continueGame() {
-            isWin = false;
-            isGameOver = false;
+            isWin = false; isGameOver = false;
             document.getElementById("result-screen").style.display = "none";
-            continueInvincibleTimer = 3; // 3초 무적 부여
+            continueInvincibleTimer = 3; 
             requestAnimationFrame(gameLoop);
         }
 
@@ -257,53 +252,48 @@
         window.addEventListener("touchend", () => { moveLeft = false; moveRight = false; });
 
         function createObject() {
-    const maxCount = isMobile ? 15 : 45; 
-    const spawnChance = (isMobile ? 0.05 : 0.12) + (survivalTimer * 0.0003);
+            const maxCount = isMobile ? 15 : 45; 
+            const spawnChance = (isMobile ? 0.05 : 0.12) + (survivalTimer * 0.0003);
 
-    if (objects.length < maxCount && Math.random() < spawnChance) {
-        // --- 잡기 모드 전용 1:1 생성 로직 ---
-        if (gameMode === 'catch') {
-            // 1:1 비율을 위해 랜덤값 0.5 기준으로 아이템/장애물 결정
-            let type = Math.random() < 0.5 ? 'item' : 'obstacle';
-            spawnOneObject(type);
-        } else {
-            // 서바이벌 모드는 기존 방식 유지 (장애물 비중 높음)
-            let type = Math.random() < 0.3 ? 'item' : 'obstacle';
-            spawnOneObject(type);
+            if (objects.length < maxCount && Math.random() < spawnChance) {
+                if (gameMode === 'catch') {
+                    let type = Math.random() < 0.5 ? 'item' : 'obstacle';
+                    spawnOneObject(type);
+                } else {
+                    let type = Math.random() < 0.3 ? 'item' : 'obstacle';
+                    spawnOneObject(type);
+                }
+            }
         }
-    }
-}
 
-// 개별 오브젝트 생성 보조 함수
-function spawnOneObject(type) {
-    let w = isMobile ? 30 : 60;
-    let h = (type === 'item') ? (isMobile ? 40 : 80) : (isMobile ? 30 : 60);
+        function spawnOneObject(type) {
+            let w = isMobile ? 30 : 60;
+            let h = (type === 'item') ? (isMobile ? 40 : 80) : (isMobile ? 30 : 60);
+            let xPos = Math.random() * (canvas.width - w);
+            let attempts = 0;
+            while (attempts < 5) {
+                let overlap = objects.some(o => o.y < 120 && xPos < o.x + o.width + 15 && xPos + w > o.x - 15);
+                if (!overlap) break;
+                xPos = Math.random() * (canvas.width - w);
+                attempts++;
+            }
 
-    let xPos = Math.random() * (canvas.width - w);
-    let attempts = 0;
-    while (attempts < 5) {
-        let overlap = objects.some(o => o.y < 120 && xPos < o.x + o.width + 15 && xPos + w > o.x - 15);
-        if (!overlap) break;
-        xPos = Math.random() * (canvas.width - w);
-        attempts++;
-    }
+            // 속도 천천히 증가 로직
+            let baseSpeed = isMobile ? 4.5 : 6; 
+            let speedIncrement = survivalTimer * 0.05; // 0.1에서 0.05로 하향
+            let maxAllowedSpeed = isMobile ? 12 : 18;
+            let finalSpeed = Math.min(baseSpeed + speedIncrement, maxAllowedSpeed) + (Math.random() * 3);
 
-    objects.push({
-        x: xPos, y: -h, width: w, height: h,
-        speed: (isMobile ? 5 : 7) + Math.random() * 5 + (survivalTimer * 0.1),
-        type: type, 
-        img: (type === 'item') ? itemImages[Math.floor(Math.random() * itemImages.length)] : rockImg
-    });
-}
+            objects.push({
+                x: xPos, y: -h, width: w, height: h,
+                speed: finalSpeed, type: type, 
+                img: (type === 'item') ? itemImages[Math.floor(Math.random() * itemImages.length)] : rockImg
+            });
+        }
 
         function update(deltaTime) {
             if (!isStarted || isGameOver || isWin) return;
-            
-            // 무적 타이머 감소
-            if (continueInvincibleTimer > 0) {
-                continueInvincibleTimer -= deltaTime / 1000;
-            }
-
+            if (continueInvincibleTimer > 0) continueInvincibleTimer -= deltaTime / 1000;
             survivalTimer += deltaTime / 1000; 
 
             if (gameMode === "survival") {
@@ -324,7 +314,6 @@ function spawnOneObject(type) {
                 let pad = isMobile ? 8 : 12;
                 if (o.x < player.x + player.width - pad && o.x + o.width > player.x + pad &&
                     o.y < player.y + player.height - pad && o.y + o.height > player.y + pad) {
-                    
                     if (o.type === 'item') {
                         heartPieces++;
                         if (gameMode === "catch") score++;
@@ -343,13 +332,11 @@ function spawnOneObject(type) {
         function finish(victory) {
             const screen = document.getElementById("result-screen");
             const btnGroup = document.getElementById("result-btns");
-            btnGroup.innerHTML = ''; // 버튼 초기화
+            btnGroup.innerHTML = ''; 
 
             if (victory) {
                 document.getElementById("result-msg").innerHTML = "성공!<br>미션을 완료했습니다!";
                 document.getElementById("final-stats").innerText = "";
-                
-                // 성공 시 버튼: [모드선택] [이어하기]
                 btnGroup.innerHTML = `
                     <button class="result-btn btn-sub" onclick="location.reload()">모드선택</button>
                     <button class="result-btn btn-main" onclick="continueGame()">이어하기</button>
@@ -357,8 +344,6 @@ function spawnOneObject(type) {
             } else {
                 document.getElementById("result-msg").innerHTML = "게임 오버!";
                 document.getElementById("final-stats").innerText = (gameMode === "survival" ? `최종 점수: ${Math.floor(score)}` : `구출한 수: ${Math.floor(score)}`);
-                
-                // 실패 시 버튼: [다시하기] [모드선택]
                 btnGroup.innerHTML = `
                     <button class="result-btn btn-main" onclick="startGame('${gameMode}')">다시하기</button>
                     <button class="result-btn btn-sub" onclick="location.reload()">모드선택</button>
@@ -370,243 +355,7 @@ function spawnOneObject(type) {
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             if (!isStarted) return;
-
-            // 무적 시 깜빡임 효과
-            if (continueInvincibleTimer > 0) {
-                if (Math.floor(Date.now() / 100) % 2 === 0) return; // 0.1초 간격으로 그리지 않음
-            }
-
-            if (playerImg.complete) ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
-            objects.forEach(o => { if (o.img.complete) ctx.drawImage(o.img, o.x, o.y, o.width, o.height); });
-        }
-
-        function gameLoop(timestamp) {
-            if (!lastTime) lastTime = timestamp;
-            const deltaTime = timestamp - lastTime;
-            lastTime = timestamp;
-            update(deltaTime);
-            draw();
-            if (!isGameOver && !isWin) requestAnimationFrame(gameLoop);
-        }
-    </script>
-</body>
-</html>            <div class="mode-card" onclick="handleCardClick(this)">
-                <h2>215초를 버텨라!</h2>
-                <div class="mode-desc">215초 동안 떨어지는 돌을 피해 생존하세요!</div>
-                <button class="start-btn" onclick="startGame('survival', event)">시작하기</button>
-            </div>
-            <div class="mode-card" onclick="handleCardClick(this)">
-                <h2>215명의 파이브를 잡아라!</h2>
-                <div class="mode-desc">돌을 피해 파이브 215명을 상자 속으로 넣으세요!</div>
-                <button class="start-btn" onclick="startGame('catch', event)">시작하기</button>
-            </div>
-        </div>
-        <div id="control-guide"></div>
-    </div>
-
-    <div id="result-screen">
-        <div id="result-msg"></div>
-        <div id="final-stats"></div>
-        <button class="restart-btn" onclick="location.reload()">다시 시작하기</button>
-    </div>
-
-    <div id="ui-container">
-        <div id="mode-label" class="label-text">목숨</div>
-        <div id="heart-list"></div>
-        <div class="stats-row" id="stats-text">SCORE: 0</div>
-    </div>
-
-    <canvas id="gameCanvas"></canvas>
-
-    <script>
-        const canvas = document.getElementById("gameCanvas");
-        const ctx = canvas.getContext("2d");
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-        // 이미지 로드
-        function loadImg(src) { const img = new Image(); img.src = src; return img; }
-        const playerImg = loadImg('box.png'); 
-        const itemImages = [loadImg('1.5p.jpg'), loadImg('2.5p.jpg'), loadImg('4.5.png'), loadImg('5.5.png')];
-        const rockImg = loadImg('s.png');
-        const heartImgSrc = '3.5.png'; 
-
-        // 게임 변수
-        let lives = 3, heartPieces = 0, score = 0, isGameOver = false, isWin = false, isStarted = false;
-        let lastTime = 0, objects = [], moveLeft = false, moveRight = false, keys = {};
-        let gameMode = "", survivalTimer = 0;
-        const targetCatch = 215, survivalDuration = 215, targetSurvivalScore = 55555;
-        let skipInput = "", isInvincible = false;
-
-        // 플레이어 초기화
-        let player = {
-            x: 0, y: 0, 
-            width: isMobile ? 30 : 60,
-            height: isMobile ? 30 : 60,
-            speed: isMobile ? 11 : 16 
-        };
-
-        // 가이드 문구 설정
-        document.getElementById('control-guide').innerText = isMobile ? "하단 좌/우 영역을 터치해 움직이세요" : "좌우 화살표 키로 움직이세요";
-
-        // 화면 크기 조절 함수 (중복 제거 및 통합)
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            player.x = canvas.width / 2 - player.width / 2;
-            player.y = canvas.height - (isMobile ? 110 : 140);
-        }
-
-        window.addEventListener('resize', resize);
-        resize(); // 페이지 로드 시 최초 1회 실행
-
-        function handleCardClick(card) {
-            document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
-            card.classList.add('active');
-        }
-
-        function startGame(mode, event) {
-            event.stopPropagation();
-            resize(); // 시작 시점에 한 번 더 위치를 잡음
-            gameMode = mode;
-            document.getElementById("start-screen").style.display = "none";
-            document.getElementById("ui-container").style.display = "flex";
-            isStarted = true;
-            updateUI();
-            requestAnimationFrame(gameLoop);
-        }
-
-        function updateUI() {
-            const list = document.getElementById('heart-list');
-            list.innerHTML = '';
-            for (let i = 0; i < lives; i++) addHeartToUI(100);
-            if (lives < 10 && (heartPieces > 0 || lives === 0)) addHeartToUI((heartPieces / 5) * 100);
-
-            const scoreDisplay = Math.floor(score);
-            const statsText = document.getElementById('stats-text');
-            if (gameMode === "survival") {
-                statsText.innerHTML = `SCORE: ${scoreDisplay}`;
-            } else {
-                let remaining = Math.max(0, targetCatch - scoreDisplay);
-                statsText.innerHTML = `남은 파이브: ${remaining}`;
-            }
-        }
-
-        function addHeartToUI(fill) {
-            const unit = document.createElement('div'); unit.className = 'heart-unit';
-            const mask = document.createElement('div'); mask.className = 'heart-mask';
-            mask.style.height = fill + '%';
-            const img = document.createElement('img'); img.src = heartImgSrc; img.className = 'heart-img';
-            mask.appendChild(img); unit.appendChild(mask);
-            document.getElementById('heart-list').appendChild(unit);
-        }
-
-        // 입력 처리
-        window.addEventListener("keydown", (e) => {
-            keys[e.code] = true;
-            if (isStarted && !isGameOver) {
-                skipInput += e.key.toLowerCase();
-                if (skipInput.endsWith("skip")) {
-                    isInvincible = true;
-                    if (gameMode === "survival") survivalTimer = survivalDuration - 5;
-                    else score = targetCatch - 5;
-                    skipInput = "";
-                }
-            }
-        });
-        window.addEventListener("keyup", (e) => keys[e.code] = false);
-
-        window.addEventListener("touchstart", (e) => {
-            if(!isStarted) return;
-            const touchX = e.touches[0].clientX;
-            if (touchX < window.innerWidth / 2) moveLeft = true; else moveRight = true;
-        }, {passive: false});
-        window.addEventListener("touchend", () => { moveLeft = false; moveRight = false; });
-// 1. 오브젝트 생성 로직 수정 (물량 대폭 감소)
-function createObject() {
-    // 모바일이면 최대 15개만, PC는 45개 정도로 조절
-    const maxCount = isMobile ? 15 : 45; 
-    // 생성 확률을 낮춤 (0.05는 꽤 여유로운 편입니다)
-    const spawnChance = (isMobile ? 0.05 : 0.12) + (survivalTimer * 0.0003);
-
-    if (objects.length < maxCount && Math.random() < spawnChance) {
-        let type = Math.random() < 0.3 ? 'item' : 'obstacle'; // 아이템 비중을 25%->30%로 살짝 업
-        let w = isMobile ? 30 : 60;
-        let h = (type === 'item') ? (isMobile ? 40 : 80) : (isMobile ? 30 : 60);
-
-        let xPos = Math.random() * (canvas.width - w);
-        
-        // 겹침 방지 시도
-        let attempts = 0;
-        while (attempts < 5) {
-            let overlap = objects.some(o => o.y < 150 && xPos < o.x + o.width + 30 && xPos + w > o.x - 30);
-            if (!overlap) break;
-            xPos = Math.random() * (canvas.width - w);
-            attempts++;
-        }
-
-        objects.push({
-            x: xPos, y: -h, width: w, height: h,
-            // 속도를 살짝 낮춤 (기본 7 -> 5)
-            speed: (isMobile ? 5 : 7) + Math.random() * 5 + (survivalTimer * 0.07),
-            type: type, 
-            img: (type === 'item') ? itemImages[Math.floor(Math.random() * itemImages.length)] : rockImg
-        });
-    }
-}
-
-// 2. 충돌 판정 완화 (update 함수 내부)
-// o.x < player.x + player.width - pad 부분의 pad 값을 키우면 판정이 널널해집니다.
-// 아래는 update 함수의 충돌 체크 부분 예시입니다.
-let pad = isMobile ? 8 : 12; // 숫자가 클수록 플레이어에게 유리해집니다 (안 맞음)
-
-        // 게임 업데이트
-        function update(deltaTime) {
-            if (!isStarted || isGameOver || isWin) return;
-            survivalTimer += deltaTime / 1000; 
-
-            if (gameMode === "survival") {
-                score = (targetSurvivalScore / survivalDuration) * survivalTimer;
-                if (survivalTimer >= survivalDuration) { score = targetSurvivalScore; isWin = true; finish(true); }
-            } else {
-                if (score >= targetCatch) { score = targetCatch; isWin = true; finish(true); }
-            }
-
-            updateUI();
-            if ((keys["ArrowLeft"] || moveLeft) && player.x > 0) player.x -= player.speed;
-            if ((keys["ArrowRight"] || moveRight) && player.x < canvas.width - player.width) player.x += player.speed;
-
-            createObject();
-
-            for (let i = objects.length - 1; i >= 0; i--) {
-                let o = objects[i]; o.y += o.speed;
-                let pad = isMobile ? 2 : 8;
-                if (o.x < player.x + player.width - pad && o.x + o.width > player.x + pad &&
-                    o.y < player.y + player.height - pad && o.y + o.height > player.y + pad) {
-                    if (o.type === 'item') {
-                        heartPieces++;
-                        if (gameMode === "catch") score++;
-                        if (heartPieces >= 5) { if (lives < 10) lives++; heartPieces = 0; }
-                    } else if (!isInvincible) {
-                        lives--;
-                        if (lives <= 0) { isGameOver = true; finish(false); }
-                    }
-                    objects.splice(i, 1);
-                    continue;
-                }
-                if (o.y > canvas.height) objects.splice(i, 1);
-            }
-        }
-
-        function finish(victory) {
-            const screen = document.getElementById("result-screen");
-            document.getElementById("result-msg").innerHTML = victory ? (gameMode === "survival" ? "성공!<br>215초를 버텼습니다!" : "성공!<br>215명을 구했습니다!") : "게임 오버!";
-            document.getElementById("final-stats").innerText = victory ? "" : (gameMode === "survival" ? `최종 점수: ${Math.floor(score)}` : `구출한 수: ${Math.floor(score)}`);
-            screen.style.display = "flex";
-        }
-
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            if (!isStarted) return;
+            if (continueInvincibleTimer > 0 && Math.floor(Date.now() / 100) % 2 === 0) return;
             if (playerImg.complete) ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
             objects.forEach(o => { if (o.img.complete) ctx.drawImage(o.img, o.x, o.y, o.width, o.height); });
         }
@@ -622,7 +371,3 @@ let pad = isMobile ? 8 : 12; // 숫자가 클수록 플레이어에게 유리해
     </script>
 </body>
 </html>
-
-
-
-
