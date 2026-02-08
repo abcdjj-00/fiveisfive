@@ -62,24 +62,30 @@
         .mode-card.active { transform: scale(1.02); background-color: #fff; border: 1px solid #444; }
         .mode-card.active .mode-desc, .mode-card.active .start-btn { opacity: 1; transform: translateY(0); pointer-events: auto; }
 
-        /* --- 결과 및 멈춤 화면 --- */
+        /* --- 결과 및 멈춤 화면 (밝게 조정) --- */
         #result-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: none; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 200; color: white; background-color: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px);
+            z-index: 200; color: white; 
+            background-color: rgba(30, 30, 35, 0.7); /* 배경을 덜 어둡게 수정 */
+            backdrop-filter: blur(5px); /* 블러 강도 조절 */
         }
 
-        #result-msg { font-size: 24px; font-weight: 800; margin-bottom: 20px; text-align: center; line-height: 1.5; padding: 0 20px; word-break: keep-all; }
-        #final-stats { font-size: 18px; margin-bottom: 30px; color: rgba(255, 255, 255, 0.8); }
+        #result-msg { 
+            font-size: 24px; font-weight: 800; margin-bottom: 15px; text-align: center; 
+            line-height: 1.5; padding: 0 20px; word-break: keep-all;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3); /* 가독성 강화 */
+        }
+        #final-stats { font-size: 18px; margin-bottom: 30px; color: rgba(255, 255, 255, 0.9); }
         
         .btn-group { display: flex; gap: 15px; }
         .result-btn { 
             padding: 15px 30px; font-size: 16px; font-weight: bold; border-radius: 50px; 
             border: none; cursor: pointer; transition: 0.2s; min-width: 130px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
-        /* 왼쪽 다시/이어하기(main), 오른쪽 모드선택(sub) 배치 */
         .btn-main { background-color: white; color: #333; order: 1; }
-        .btn-sub { background-color: rgba(255,255,255,0.2); color: white; border: 1px solid white; order: 2; }
+        .btn-sub { background-color: rgba(255,255,255,0.25); color: white; border: 1.5px solid white; order: 2; }
 
         /* --- 게임 UI --- */
         #ui-container {
@@ -87,13 +93,18 @@
             display: none; flex-direction: column; gap: 8px; pointer-events: none; z-index: 50;
         }
 
+        /* 멈추기 버튼 (테두리 제거) */
         #pause-btn {
             position: fixed; top: 15px; right: 15px;
-            width: 44px; height: 44px; background: rgba(255,255,255,0.6);
-            border: 2px solid #333; border-radius: 12px;
+            width: 44px; height: 44px; 
+            background: rgba(200, 200, 200, 0.4); /* 연한 배경 */
+            border: none; /* 테두리 제거 */
+            border-radius: 50%; /* 동그란 느낌으로 변경 */
             display: none; justify-content: center; align-items: center;
-            cursor: pointer; z-index: 150; font-size: 20px; font-weight: bold; color: #333;
+            cursor: pointer; z-index: 150; font-size: 18px; color: #333;
+            transition: background 0.2s;
         }
+        #pause-btn:active { background: rgba(200, 200, 200, 0.7); }
 
         .label-text { color: #333; font-size: 15px; font-weight: bold; }
         #heart-list { display: flex; gap: 5px; }
@@ -192,18 +203,14 @@
             card.classList.add('active');
         }
 
-        // 게임 시작 (동작 보장)
         function startGame(mode, event) {
             if(event) event.stopPropagation();
             resetGameData();
             gameMode = mode;
-            
-            // 화면 전환
             document.getElementById("start-screen").style.display = "none";
             document.getElementById("result-screen").style.display = "none";
             document.getElementById("ui-container").style.display = "flex";
             document.getElementById("pause-btn").style.display = "flex";
-            
             isStarted = true; isGameOver = false; isWin = false; isContinued = false; isPaused = false;
             updateUI();
             lastTime = performance.now();
@@ -215,14 +222,12 @@
             objects = []; lastTime = 0; continueInvincibleTimer = 0; isInvincible = false;
         }
 
-        // 일시정지
         function pauseGame() {
             if (!isStarted || isGameOver || isWin || isPaused) return;
             isPaused = true;
             showPopup("잠시 멈춤", "게임을 계속하시겠습니까?", true);
         }
 
-        // 이어하기 (3초 무적, 깜빡임 없음)
         function continueGame() {
             isWin = false; isGameOver = false; isPaused = false;
             isContinued = true; 
@@ -378,7 +383,6 @@
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             if (!isStarted) return;
-            // 무적 시간 깜빡임 효과 제거됨 (항상 보임)
             if (playerImg.complete) ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
             objects.forEach(o => { if (o.img.complete) ctx.drawImage(o.img, o.x, o.y, o.width, o.height); });
         }
