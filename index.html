@@ -5,94 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>웹 게임 - 파이브와 돌</title>
     <style>
-        * {
-            touch-action: none;
-            -webkit-user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            box-sizing: border-box;
-            margin: 0; padding: 0;
-        }
-
-        body { 
-            overflow: hidden; background-color: #ffffff; 
-            font-family: 'Pretendard', sans-serif; width: 100vw; height: 100vh;
-            position: fixed; top: 0; left: 0;
-        }
-
+        /* 기존 스타일 동일 */
+        * { touch-action: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; box-sizing: border-box; margin: 0; padding: 0; }
+        body { overflow: hidden; background-color: #ffffff; font-family: 'Pretendard', sans-serif; width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; }
         canvas { display: block; }
-
-        /* --- UI 스타일 --- */
-        #start-screen {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(255, 255, 255, 0.95);
-            display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100;
-        }
+        #start-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
         #game-title { font-size: 32px; font-weight: 900; margin-bottom: 30px; color: #333; }
         .mode-container { display: flex; flex-direction: row; gap: 20px; align-items: stretch; padding: 15px; }
-        .mode-card {
-            width: 280px; background-color: rgba(245, 245, 245, 0.9);
-            border-radius: 20px; padding: 30px 20px;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-            position: relative; border: 1px solid rgba(0,0,0,0.05);
-            cursor: pointer;
-        }
+        .mode-card { width: 280px; background-color: rgba(245, 245, 245, 0.9); border-radius: 20px; padding: 30px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); transition: all 0.3s ease; position: relative; border: 1px solid rgba(0,0,0,0.05); cursor: pointer; }
         .mode-card h2 { margin-bottom: 15px; font-size: 20px; color: #222; text-align: center; }
-        .mode-desc {
-            font-size: 14px; color: #555; line-height: 1.5; text-align: center;
-            margin-bottom: 20px; opacity: 0; transform: translateY(10px); transition: 0.3s;
-            pointer-events: none; word-break: keep-all; min-height: 60px;
-            display: flex; align-items: center;
-        }
-        .start-btn {
-            width: 100%; padding: 12px; font-size: 16px; font-weight: bold;
-            color: white; border: none; border-radius: 12px;
-            background-color: #444; opacity: 0; transform: translateY(10px); transition: 0.3s;
-        }
-        @media (hover: hover) {
-            .mode-card:hover { transform: translateY(-5px); background-color: #fff; }
-            .mode-card:hover .mode-desc, .mode-card:hover .start-btn { opacity: 1; transform: translateY(0); pointer-events: auto; }
-        }
+        .mode-desc { font-size: 14px; color: #555; line-height: 1.5; text-align: center; margin-bottom: 20px; opacity: 0; transform: translateY(10px); transition: 0.3s; pointer-events: none; word-break: keep-all; min-height: 60px; display: flex; align-items: center; }
+        .start-btn { width: 100%; padding: 12px; font-size: 16px; font-weight: bold; color: white; border: none; border-radius: 12px; background-color: #444; opacity: 0; transform: translateY(10px); transition: 0.3s; }
+        @media (hover: hover) { .mode-card:hover { transform: translateY(-5px); background-color: #fff; } .mode-card:hover .mode-desc, .mode-card:hover .start-btn { opacity: 1; transform: translateY(0); pointer-events: auto; } }
         .mode-card.active { transform: scale(1.02); background-color: #fff; border: 1px solid #444; }
         .mode-card.active .mode-desc, .mode-card.active .start-btn { opacity: 1; transform: translateY(0); pointer-events: auto; }
-
-        #result-screen {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: none; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 200; color: white; background-color: rgba(30, 30, 35, 0.7); backdrop-filter: blur(5px);
-        }
+        #result-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 200; color: white; background-color: rgba(30, 30, 35, 0.7); backdrop-filter: blur(5px); }
         #result-msg { font-size: 24px; font-weight: 800; margin-bottom: 15px; text-align: center; line-height: 1.5; padding: 0 20px; word-break: keep-all; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
         #final-stats { font-size: 18px; margin-bottom: 30px; color: rgba(255, 255, 255, 0.9); text-align: center; line-height: 1.6; }
         .btn-group { display: flex; gap: 15px; }
         .result-btn { padding: 15px 30px; font-size: 16px; font-weight: bold; border-radius: 50px; border: none; cursor: pointer; transition: 0.2s; min-width: 130px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         .btn-main { background-color: white; color: #333; order: 1; }
         .btn-sub { background-color: rgba(255,255,255,0.25); color: white; border: 1.5px solid white; order: 2; }
-
         #ui-container { position: fixed; top: 15px; left: 15px; display: none; flex-direction: column; gap: 8px; pointer-events: none; z-index: 50; }
-        #pause-btn {
-            position: fixed; top: 20px; right: 20px; width: 30px; height: 30px; 
-            background: none; border: none; display: none; justify-content: center; align-items: center;
-            cursor: pointer; z-index: 150; transition: transform 0.1s;
-        }
+        #pause-btn { position: fixed; top: 20px; right: 20px; width: 30px; height: 30px; background: none; border: none; display: none; justify-content: center; align-items: center; cursor: pointer; z-index: 150; transition: transform 0.1s; }
         #pause-btn::before, #pause-btn::after { content: ''; width: 4px; height: 20px; background-color: #333; border-radius: 2px; position: absolute; }
         #pause-btn::before { left: 7px; }
         #pause-btn::after { right: 7px; }
-        #pause-btn:active { transform: scale(0.9); }
-
         .label-text { color: #333; font-size: 15px; font-weight: bold; }
         #heart-list { display: flex; gap: 5px; }
         .heart-unit { position: relative; width: 28px; height: 28px; background-color: #eee; border-radius: 4px; overflow: hidden;}
         .heart-mask { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; transition: height 0.3s; }
         .heart-img { width: 28px; height: 28px; object-fit: contain; }
         .stats-row { font-size: 18px; font-weight: bold; color: #333; margin-top: 2px; }
-        #control-guide { position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.6); color: white; padding: 10px 20px; border-radius: 25px; font-size: 13px; z-index: 150; pointer-events: none; white-space: nowrap; }
-
-        @media (max-width: 700px) {
-            .mode-container { flex-direction: column; gap: 15px; }
-            .mode-card { width: 85vw; padding: 25px 20px; }
-            #game-title { font-size: 26px; }
-        }
+        @media (max-width: 700px) { .mode-container { flex-direction: column; gap: 15px; } .mode-card { width: 85vw; padding: 25px 20px; } #game-title { font-size: 26px; } }
     </style>
 </head>
 <body>
@@ -110,7 +55,6 @@
                 <button class="start-btn" onclick="startGame('catch', event)">시작하기</button>
             </div>
         </div>
-        <div id="control-guide"></div>
     </div>
 
     <div id="pause-btn" onclick="pauseGame()"></div>
@@ -137,6 +81,7 @@
         // --- 사운드 설정 ---
         const hitSound = new Audio('25.mp3');
         const gameOverSound = new Audio('2s.mp3');
+        const winSound = new Audio('15.mp3'); // 클리어 사운드 추가
 
         function playSound(sound) {
             sound.currentTime = 0;
@@ -152,7 +97,6 @@
         let lives = 3, heartPieces = 0, score = 0, isGameOver = false, isWin = false, isStarted = false, isPaused = false;
         let lastTime = 0, objects = [], moveLeft = false, moveRight = false, keys = {};
         let gameMode = "", survivalTimer = 0, isContinued = false;
-        
         const targetCatch = 215, survivalDuration = 215, targetSurvivalScore = 55555;
         let skipInput = "", isInvincible = false, continueInvincibleTimer = 0; 
 
@@ -310,10 +254,18 @@
             if (gameMode === "survival") {
                 if (!isContinued) {
                     score = (targetSurvivalScore / survivalDuration) * survivalTimer;
-                    if (survivalTimer >= survivalDuration) { score = targetSurvivalScore; isWin = true; finish(true); }
+                    if (survivalTimer >= survivalDuration) { 
+                        score = targetSurvivalScore; isWin = true; 
+                        setTimeout(() => playSound(winSound), 300); // 승리 사운드 0.3초 딜레이
+                        finish(true); 
+                    }
                 } else { score = (targetSurvivalScore / survivalDuration) * survivalTimer; }
             } else {
-                if (!isContinued && score >= targetCatch) { score = targetCatch; isWin = true; finish(true); }
+                if (!isContinued && score >= targetCatch) { 
+                    score = targetCatch; isWin = true; 
+                    setTimeout(() => playSound(winSound), 300); // 승리 사운드 0.3초 딜레이
+                    finish(true); 
+                }
             }
 
             updateUI();
@@ -326,10 +278,8 @@
                 let pad = isMobile ? 8 : 12;
                 if (o.x < player.x + player.width - pad && o.x + o.width > player.x + pad && o.y < player.y + player.height - pad && o.y + o.height > player.y + pad) {
                     
-                    // --- 충돌 즉시 hitSound 재생 ---
-                    playSound(hitSound);
-
                     if (o.type === 'item') { 
+                        playSound(hitSound);
                         heartPieces++; score++; 
                         if (heartPieces >= 5) { if (lives < 10) lives++; heartPieces = 0; } 
                     }
@@ -337,12 +287,15 @@
                         lives--; 
                         if (lives <= 0) { 
                             isGameOver = true; 
-                            // --- 죽었을 때만 0.3초 딜레이 후 gameOverSound 재생 ---
-                            setTimeout(() => {
-                                playSound(gameOverSound);
-                            }, 300);
+                            // --- 죽는 즉시 현재 재생되던 hitSound 멈춤 ---
+                            hitSound.pause();
+                            hitSound.currentTime = 0;
+                            // --- 죽고 0.3초 뒤 사망 사운드 재생 ---
+                            setTimeout(() => playSound(gameOverSound), 300);
                             finish(false); 
-                        } 
+                        } else {
+                            playSound(hitSound); // 살아있을 때는 충돌음 재생
+                        }
                     }
                     objects.splice(i, 1); continue;
                 }
@@ -355,7 +308,6 @@
             let timeStr = `버틴 시간: ${Math.floor(survivalTimer)}초`;
             if (gameMode === "survival") stats = `${timeStr}<br>최종 점수: ${Math.floor(score)}점`;
             else stats = `${timeStr}<br>${isContinued ? `잡은 파이브: ${Math.floor(score)}명` : `남은 파이브: ${Math.max(0, targetCatch - Math.floor(score))}명`}`;
-
             if (victory) showPopup((gameMode === 'catch') ? "성공!<br>215명의 파이브를 구출했습니다!" : "성공!<br>215초를 버텨냈습니다!", stats, false);
             else showPopup("게임 오버!", stats, false);
         }
@@ -378,7 +330,3 @@
     </script>
 </body>
 </html>
-
-
-
-
