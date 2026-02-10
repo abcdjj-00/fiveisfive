@@ -12,8 +12,8 @@
         /* --- 오프닝 팝업 스타일 --- */
         #opening-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.4); /* 배경을 투명하게 설정 */
-            backdrop-filter: blur(3px); /* 뒤쪽 배경을 살짝 흐리게 처리 */
+            background-color: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(3px);
             display: flex; justify-content: center; align-items: center; z-index: 1000;
         }
         #opening-box {
@@ -69,11 +69,26 @@
         .btn-sub { background-color: rgba(255,255,255,0.25); color: white; border: 1.5px solid white; order: 2; }
 
         #ui-container { position: fixed; top: 15px; left: 15px; display: none; flex-direction: column; gap: 8px; pointer-events: none; z-index: 50; }
-        #pause-btn { position: fixed; top: 20px; right: 20px; width: 30px; height: 30px; background: none; border: none; display: none; justify-content: center; align-items: center; cursor: pointer; z-index: 150; }
+        
+        /* --- 제어 버튼 위치 로직 --- */
+        #pause-btn { 
+            position: fixed; top: 20px; right: 20px; width: 30px; height: 30px; 
+            background: none; border: none; display: none; justify-content: center; 
+            align-items: center; cursor: pointer; z-index: 150; 
+        }
         #pause-btn::before, #pause-btn::after { content: ''; width: 4px; height: 18px; background-color: #333; border-radius: 2px; position: absolute; }
         #pause-btn::before { left: 8px; } #pause-btn::after { right: 8px; }
 
-        #sound-btn { position: fixed; top: 20px; right: 65px; width: 30px; height: 30px; background: none; border: none; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 150; }
+        #sound-btn { 
+            position: fixed; top: 20px; width: 30px; height: 30px; 
+            background: none; border: none; display: flex; justify-content: center; 
+            align-items: center; cursor: pointer; z-index: 150; transition: right 0.3s ease;
+        }
+        /* 시작 페이지에서의 위치 (멈춤버튼 자리) */
+        .sound-at-start { right: 20px; }
+        /* 게임 중 위치 (멈춤버튼 옆) */
+        .sound-at-game { right: 65px; }
+
         #sound-icon { width: 24px; height: 24px; fill: #333; transition: 0.2s; }
 
         .label-text { color: #333; font-size: 15px; font-weight: bold; }
@@ -134,7 +149,7 @@
         <div id="control-guide">안내 문구 로딩중...</div>
     </div>
 
-    <button id="sound-btn" onclick="toggleSound()">
+    <button id="sound-btn" class="sound-at-start" onclick="toggleSound()">
         <svg id="sound-icon" viewBox="0 0 24 24">
             <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
         </svg>
@@ -165,7 +180,6 @@
         const slides = document.querySelectorAll('.opening-slide');
         
         window.addEventListener('DOMContentLoaded', () => {
-            // 탭/창을 닫으면 초기화되는 sessionStorage 사용
             if (sessionStorage.getItem('hideOpening') === 'true') {
                 document.getElementById('opening-overlay').style.display = 'none';
             }
@@ -245,10 +259,18 @@
             if(event) event.stopPropagation();
             resetGameData();
             gameMode = mode;
+            
+            // UI 상태 변경
             document.getElementById("start-screen").style.display = "none";
             document.getElementById("result-screen").style.display = "none";
             document.getElementById("ui-container").style.display = "flex";
             document.getElementById("pause-btn").style.display = "flex";
+            
+            // --- 소리 버튼 위치 이동 ---
+            const sBtn = document.getElementById("sound-btn");
+            sBtn.classList.remove("sound-at-start");
+            sBtn.classList.add("sound-at-game");
+
             isStarted = true; isGameOver = false; isWin = false; isContinued = false; isPaused = false;
             updateUI();
             lastTime = performance.now();
@@ -287,7 +309,13 @@
             const subBtn = document.createElement("button");
             subBtn.className = "result-btn btn-sub";
             subBtn.innerText = "모드선택";
-            subBtn.onclick = () => location.reload();
+            subBtn.onclick = () => {
+                // 모드 선택 페이지로 갈 때 버튼 위치 원복
+                const sBtn = document.getElementById("sound-btn");
+                sBtn.classList.remove("sound-at-game");
+                sBtn.classList.add("sound-at-start");
+                location.reload();
+            };
 
             if (isPauseMode || isWin) {
                 mainBtn.innerText = "이어하기";
