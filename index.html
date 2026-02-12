@@ -9,7 +9,42 @@
         body { overflow: hidden; background-color: #ffffff; font-family: 'Pretendard', sans-serif; width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; }
         canvas { display: block; }
 
-        /* --- UI 스타일 --- */
+        /* --- 오프닝 팝업 스타일 --- */
+        #opening-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(3px);
+            display: flex; justify-content: center; align-items: center; z-index: 1000;
+        }
+        #opening-box {
+            width: 90%; max-width: 400px; background: white; border-radius: 20px;
+            padding: 30px; position: relative; text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+        }
+        .opening-slide { display: none; min-height: 280px; flex-direction: column; }
+        .opening-slide.active { display: flex; animation: fadeIn 0.3s; }
+        .opening-img-placeholder {
+            width: 100%; height: 150px; background-color: #eee; border-radius: 10px;
+            margin-bottom: 20px; display: flex; justify-content: center; align-items: center; color: #999;
+        }
+        .opening-title { font-size: 20px; font-weight: bold; margin-bottom: 15px; color: #222; }
+        .opening-desc { font-size: 14px; color: #555; line-height: 1.6; text-align: left; }
+
+        .opening-footer { display: flex; gap: 10px; margin-top: 20px; }
+        .op-btn { flex: 1; padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; border: none; font-size: 14px; }
+        #close-opening { background: #eee; color: #333; }
+        #never-show-opening { background: #444; color: white; }
+
+        .nav-btn {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            background: #333; color: white; border: none; width: 35px; height: 35px; border-radius: 50%;
+            font-size: 18px; cursor: pointer; display: flex; justify-content: center; align-items: center;
+            opacity: 0.8;
+        }
+        #next-btn { right: -15px; }
+        #prev-btn { left: -15px; }
+
+        /* --- 게임 UI 스타일 --- */
         #start-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
         #game-title { font-size: 32px; font-weight: 900; margin-bottom: 30px; color: #333; }
         .mode-container { display: flex; flex-direction: row; gap: 20px; align-items: stretch; padding: 15px; }
@@ -25,7 +60,6 @@
         .mode-card.active { transform: scale(1.02); background-color: #fff; border: 1px solid #444; }
         .mode-card.active .mode-desc, .mode-card.active .start-btn { opacity: 1; transform: translateY(0); pointer-events: auto; }
 
-        /* 결과 화면 */
         #result-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 200; color: white; background-color: rgba(30, 30, 35, 0.7); backdrop-filter: blur(5px); }
         #result-msg { font-size: 24px; font-weight: 800; margin-bottom: 15px; text-align: center; line-height: 1.5; padding: 0 20px; word-break: keep-all; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
         #final-stats { font-size: 18px; margin-bottom: 30px; color: rgba(255, 255, 255, 0.9); text-align: center; line-height: 1.6; }
@@ -34,14 +68,27 @@
         .btn-main { background-color: white; color: #333; order: 1; }
         .btn-sub { background-color: rgba(255,255,255,0.25); color: white; border: 1.5px solid white; order: 2; }
 
-        /* 게임 UI 및 상단 버튼 */
         #ui-container { position: fixed; top: 15px; left: 15px; display: none; flex-direction: column; gap: 8px; pointer-events: none; z-index: 50; }
         
-        #pause-btn { position: fixed; top: 20px; right: 20px; width: 30px; height: 30px; background: none; border: none; display: none; justify-content: center; align-items: center; cursor: pointer; z-index: 150; transition: transform 0.1s; }
+        /* --- 제어 버튼 위치 로직 --- */
+        #pause-btn { 
+            position: fixed; top: 20px; right: 20px; width: 30px; height: 30px; 
+            background: none; border: none; display: none; justify-content: center; 
+            align-items: center; cursor: pointer; z-index: 150; 
+        }
         #pause-btn::before, #pause-btn::after { content: ''; width: 4px; height: 18px; background-color: #333; border-radius: 2px; position: absolute; }
         #pause-btn::before { left: 8px; } #pause-btn::after { right: 8px; }
 
-        #sound-btn { position: fixed; top: 20px; right: 65px; width: 30px; height: 30px; background: none; border: none; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 150; }
+        #sound-btn { 
+            position: fixed; top: 20px; width: 30px; height: 30px; 
+            background: none; border: none; display: flex; justify-content: center; 
+            align-items: center; cursor: pointer; z-index: 150; transition: right 0.3s ease;
+        }
+        /* 시작 페이지에서의 위치 (멈춤버튼 자리) */
+        .sound-at-start { right: 20px; }
+        /* 게임 중 위치 (멈춤버튼 옆) */
+        .sound-at-game { right: 65px; }
+
         #sound-icon { width: 24px; height: 24px; fill: #333; transition: 0.2s; }
 
         .label-text { color: #333; font-size: 15px; font-weight: bold; }
@@ -53,10 +100,38 @@
         
         #control-guide { position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.05); color: #666; padding: 10px 20px; border-radius: 25px; font-size: 13px; z-index: 150; pointer-events: none; white-space: nowrap; font-weight: bold; }
 
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @media (max-width: 700px) { .mode-container { flex-direction: column; gap: 15px; } .mode-card { width: 85vw; padding: 25px 20px; } #game-title { font-size: 26px; } }
     </style>
 </head>
 <body>
+    <div id="opening-overlay">
+        <div id="opening-box">
+            <div class="opening-slide active">
+                <div class="opening-img-placeholder">IMAGE (MODE 1)</div>
+                <h3 class="opening-title">215초를 버텨라!</h3>
+                <p class="opening-desc"><b>모드 설명:</b>떨어지는 돌을 피해 215초를 살아남으세요.<br>파이브에 닿으면 목숨을 회복합니다! <br><br><b>클리어 조건:</b> 215초 동안 생존하세요! </p>
+            </div>
+            <div class="opening-slide">
+                <div class="opening-img-placeholder">IMAGE (MODE 2)</div>
+                <h3 class="opening-title">215명의 파이브를 잡아라!</h3>
+                <p class="opening-desc"><b>모드 설명:</b> 떨어지는 돌을 피해 파이브 215명을 잡으세요.<br>파이브에 닿으면 목숨을 회복합니다! <br><br><b>클리어 조건:</b> 파이브 215명을 상자 속으로 집어 넣으세요! </p>
+            </div>
+            <div class="opening-slide">
+                <div class="opening-img-placeholder">IMAGE (CONTROL)</div>
+                <h3 class="opening-title">조작 방법</h3>
+                <p class="opening-desc"><b>PC:</b> 방향키 (←, →)<br><b>모바일:</b> 화면 하단 좌/우 터치</p>
+                
+                <div class="opening-footer">
+                    <button id="close-opening" class="op-btn" onclick="closeOpening(false)">닫기</button>
+                    <button id="never-show-opening" class="op-btn" onclick="closeOpening(true)">다시 보지 않기</button>
+                </div>
+            </div>
+            <button id="prev-btn" class="nav-btn" onclick="changeSlide(-1)" style="display:none;">❮</button>
+            <button id="next-btn" class="nav-btn" onclick="changeSlide(1)">❯</button>
+        </div>
+    </div>
+
     <div id="start-screen">
         <div id="game-title">파이브와 돌</div>
         <div class="mode-container">
@@ -74,7 +149,7 @@
         <div id="control-guide">안내 문구 로딩중...</div>
     </div>
 
-    <button id="sound-btn" onclick="toggleSound()">
+    <button id="sound-btn" class="sound-at-start" onclick="toggleSound()">
         <svg id="sound-icon" viewBox="0 0 24 24">
             <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
         </svg>
@@ -100,30 +175,53 @@
         const ctx = canvas.getContext("2d");
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-        // --- 사운드 설정 ---
-let isMuted = false;
-const hitSound = new Audio('25.mp3');
-const gameOverSound = new Audio('2s.mp3');
-const winSound = new Audio('15.mp3');
+        // --- 오프닝 팝업 로직 (sessionStorage 적용) ---
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.opening-slide');
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            if (sessionStorage.getItem('hideOpening') === 'true') {
+                document.getElementById('opening-overlay').style.display = 'none';
+            }
+        });
 
-function playSound(sound) {
-    if (isMuted) return; // 무음 모드일 땐 소리 재생 안 함
-    sound.currentTime = 0;
-    sound.play().catch(e => {});
-}
+        function changeSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + n + slides.length) % slides.length;
+            slides[currentSlide].classList.add('active');
+            document.getElementById('prev-btn').style.display = (currentSlide === 0) ? 'none' : 'flex';
+            document.getElementById('next-btn').style.display = (currentSlide === slides.length - 1) ? 'none' : 'flex';
+        }
 
-function toggleSound() {
-    isMuted = !isMuted; // (수정됨: 오타 제거)
-    const icon = document.getElementById('sound-icon');
-    if (isMuted) {
-        // 무음 아이콘 (사선 그어진 스피커)
-        icon.innerHTML = '<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>';
-        icon.style.fill = "#aaa";
-    } else {
-        // 소리 켬 아이콘 (기본 스피커)
-        icon.innerHTML = '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>';
-        icon.style.fill = "#333";
-    }
+        function closeOpening(neverShowAgain) {
+            if (neverShowAgain) {
+                sessionStorage.setItem('hideOpening', 'true');
+            }
+            document.getElementById('opening-overlay').style.display = 'none';
+        }
+
+        // --- 사운드 및 이미지 설정 ---
+        let isMuted = false;
+        const hitSound = new Audio('25.mp3');
+        const gameOverSound = new Audio('2s.mp3');
+        const winSound = new Audio('15.mp3');
+
+        function playSound(sound) {
+            if (isMuted) return; 
+            sound.currentTime = 0;
+            sound.play().catch(e => {});
+        }
+
+        function toggleSound() {
+            isMuted = !isMuted;
+            const icon = document.getElementById('sound-icon');
+            if (isMuted) {
+                icon.innerHTML = '<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>';
+                icon.style.fill = "#aaa";
+            } else {
+                icon.innerHTML = '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>';
+                icon.style.fill = "#333";
+            }
         }
 
         function loadImg(src) { const img = new Image(); img.src = src; return img; }
@@ -132,13 +230,13 @@ function toggleSound() {
         const rockImg = loadImg('s.png');
         const heartImgSrc = '3.5.png'; 
 
+        // --- 게임 변수 ---
         let lives = 3, heartPieces = 0, score = 0, isGameOver = false, isWin = false, isStarted = false, isPaused = false;
         let lastTime = 0, objects = [], moveLeft = false, moveRight = false, keys = {};
         let gameMode = "", survivalTimer = 0, isContinued = false;
         const targetCatch = 215, survivalDuration = 215, targetSurvivalScore = 55555;
         let skipInput = "", isInvincible = false, continueInvincibleTimer = 0; 
 
-        // 조작 안내 텍스트 설정
         document.getElementById('control-guide').innerText = isMobile ? "화면 좌/우 하단을 터치하여 움직이세요" : "키보드 방향키(← →)로 움직이세요";
 
         let player = { x: 0, y: 0, width: isMobile ? 30 : 60, height: isMobile ? 30 : 60, speed: isMobile ? 7.5 : 16 };
@@ -161,10 +259,18 @@ function toggleSound() {
             if(event) event.stopPropagation();
             resetGameData();
             gameMode = mode;
+            
+            // UI 상태 변경
             document.getElementById("start-screen").style.display = "none";
             document.getElementById("result-screen").style.display = "none";
             document.getElementById("ui-container").style.display = "flex";
             document.getElementById("pause-btn").style.display = "flex";
+            
+            // --- 소리 버튼 위치 이동 ---
+            const sBtn = document.getElementById("sound-btn");
+            sBtn.classList.remove("sound-at-start");
+            sBtn.classList.add("sound-at-game");
+
             isStarted = true; isGameOver = false; isWin = false; isContinued = false; isPaused = false;
             updateUI();
             lastTime = performance.now();
@@ -203,7 +309,13 @@ function toggleSound() {
             const subBtn = document.createElement("button");
             subBtn.className = "result-btn btn-sub";
             subBtn.innerText = "모드선택";
-            subBtn.onclick = () => location.reload();
+            subBtn.onclick = () => {
+                // 모드 선택 페이지로 갈 때 버튼 위치 원복
+                const sBtn = document.getElementById("sound-btn");
+                sBtn.classList.remove("sound-at-game");
+                sBtn.classList.add("sound-at-start");
+                location.reload();
+            };
 
             if (isPauseMode || isWin) {
                 mainBtn.innerText = "이어하기";
@@ -259,7 +371,7 @@ function toggleSound() {
         window.addEventListener("touchend", () => { moveLeft = false; moveRight = false; });
 
         function createObject() {
-            const maxCount = isMobile ? 10 : 40; 
+            const maxCount = isMobile ? 15 : 45; 
             const spawnChance = (isMobile ? 0.05 : 0.12) + (survivalTimer * 0.0003);
             if (objects.length < maxCount && Math.random() < spawnChance) {
                 let type = (gameMode === 'catch') ? (Math.random() < 0.5 ? 'item' : 'obstacle') : (Math.random() < 0.3 ? 'item' : 'obstacle');
@@ -277,8 +389,8 @@ function toggleSound() {
                 xPos = Math.random() * (canvas.width - w);
                 attempts++;
             }
-            let baseSpeed = isMobile ? 4.5 : 5;
-            let finalSpeed = Math.min(baseSpeed + (survivalTimer * 0.08), 40) + (Math.random() * 1.5);
+            let baseSpeed = isMobile ? 4.5 : 6;
+            let finalSpeed = Math.min(baseSpeed + (survivalTimer * 0.1), 40) + (Math.random() * 3);
             objects.push({ x: xPos, y: -h, width: w, height: h, speed: finalSpeed, type: type, img: (type === 'item') ? itemImages[Math.floor(Math.random() * itemImages.length)] : rockImg });
         }
 
@@ -363,8 +475,6 @@ function toggleSound() {
     </script>
 </body>
 </html>
-
-
 
 
 
