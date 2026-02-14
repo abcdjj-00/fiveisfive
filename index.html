@@ -13,7 +13,6 @@
             --ui-bg: #eeeeee;
             --btn-bg: #444444;
             --btn-text: #ffffff;
-            --accent-color: #ff4757;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -28,151 +27,132 @@
             #sound-icon { fill: #f0f0f0 !important; }
             #pause-btn::before, #pause-btn::after { background-color: #f0f0f0 !important; }
             #opening-box { background: #2d2d2d !important; color: #f0f0f0; }
-            .opening-title { color: #fff !important; }
-            .opening-desc { color: #ccc !important; }
             .opening-img-placeholder { background-color: #444 !important; }
             #start-screen { background-color: rgba(26, 26, 26, 0.95) !important; }
             .mode-card { border: 1px solid rgba(255,255,255,0.05) !important; }
         }
 
         * { touch-action: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; box-sizing: border-box; margin: 0; padding: 0; }
-        body { overflow: hidden; background-color: var(--bg-color); color: var(--text-color); font-family: 'Pretendard', sans-serif; width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; transition: background-color 0.3s, color 0.3s; }
+        body { overflow: hidden; background-color: var(--bg-color); color: var(--text-color); font-family: 'Pretendard', sans-serif; width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; }
         canvas { display: block; }
 
-        /* 오프닝 팝업 */
+        /* 오프닝 팝업 생략 (동일) */
         #opening-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(3px); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        #opening-box { width: 90%; max-width: 400px; background: white; border-radius: 20px; padding: 30px; position: relative; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+        #opening-box { width: 90%; max-width: 400px; background: white; border-radius: 20px; padding: 30px; position: relative; text-align: center; }
         .opening-slide { display: none; min-height: 280px; flex-direction: column; }
         .opening-slide.active { display: flex; animation: fadeIn 0.3s; }
         .opening-img-placeholder { width: 100%; height: 150px; background-color: #eee; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: center; align-items: center; color: #999; }
-        .opening-title { font-size: 20px; font-weight: bold; margin-bottom: 15px; color: #222; }
+        .opening-title { font-size: 20px; font-weight: bold; margin-bottom: 15px; }
         .opening-desc { font-size: 14px; color: #555; line-height: 1.6; text-align: left; }
         .opening-footer { display: flex; gap: 10px; margin-top: 20px; }
-        .op-btn { flex: 1; padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; border: none; font-size: 14px; transition: 0.2s; }
-        .op-btn:hover { transform: translateY(-2px); filter: brightness(0.9); }
+        .op-btn { flex: 1; padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; border: none; }
         #close-opening { background: var(--ui-bg); color: var(--text-color); }
         #never-show-opening { background: var(--btn-bg); color: var(--btn-text); }
-        .nav-btn { position: absolute; top: 50%; transform: translateY(-50%); background: var(--btn-bg); color: var(--btn-text); border: none; width: 35px; height: 35px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; justify-content: center; align-items: center; opacity: 0.8; transition: 0.2s; }
-        .nav-btn:hover { opacity: 1; transform: translateY(-50%) scale(1.1); }
+        .nav-btn { position: absolute; top: 50%; transform: translateY(-50%); background: var(--btn-bg); color: var(--btn-text); border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; }
         #next-btn { right: -15px; } #prev-btn { left: -15px; }
 
         /* 메인 시작 화면 */
-        #start-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
-        #game-title { font-size: 48px; font-weight: 900; margin-bottom: 50px; color: var(--text-color); letter-spacing: -1px; }
+        #start-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
+        #game-title { font-size: 48px; font-weight: 900; margin-bottom: 50px; color: var(--text-color); }
         
-        /* 모드 카드 컨테이너 */
-        .mode-container { display: flex; flex-direction: row; gap: 30px; align-items: stretch; padding: 20px; }
+        .mode-container { display: flex; flex-direction: row; gap: 30px; padding: 20px; }
         
-        /* 모드 카드 디자인 & 호버 효과 */
+        /* 모드 카드 수정 */
         .mode-card { 
             width: 350px; 
             background-color: var(--card-bg); 
             border-radius: 25px; 
-            padding: 45px 30px; 
+            padding: 40px 30px; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
             justify-content: center; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            position: relative; 
-            border: 2px solid transparent; 
-            cursor: pointer; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05); 
+            transition: all 0.3s ease-out; /* 너무 튀지 않게 ease-out으로 변경 */
+            cursor: pointer;
+            border: 1px solid rgba(0,0,0,0.05);
         }
         
         .mode-card h2 { 
-            margin-bottom: 20px; 
             font-size: 24px; 
             font-weight: 800; 
-            color: var(--text-color); 
-            text-align: center; 
-            word-break: keep-all; 
+            margin-bottom: 10px;
             transition: transform 0.3s ease;
         }
         
+        /* 설명창: 기본 상태에서 숨김 */
         .mode-desc { 
-            font-size: 16px; 
-            color: var(--text-color); 
-            line-height: 1.6; 
+            font-size: 15px; 
+            line-height: 1.5; 
             text-align: center; 
-            margin-bottom: 25px; 
-            opacity: 0.6; 
-            transition: 0.3s; 
-            word-break: keep-all; 
-            min-height: 70px; 
-            display: flex; 
-            align-items: center; 
+            opacity: 0; 
+            max-height: 0; /* 공간 차지하지 않게 설정 */
+            overflow: hidden;
+            transition: all 0.3s ease; /* 스르륵 나타나는 효과 */
+            word-break: keep-all;
         }
         
         .start-btn { 
+            margin-top: 20px;
             width: 100%; 
-            padding: 16px; 
-            font-size: 18px; 
+            padding: 14px; 
+            font-size: 17px; 
             font-weight: bold; 
             color: var(--btn-text); 
             border: none; 
-            border-radius: 15px; 
+            border-radius: 12px; 
             background-color: var(--btn-bg); 
-            transition: all 0.3s ease; 
-            cursor: pointer; 
+            transition: 0.3s;
         }
 
-        /* 호버 시 발동 효과 */
+        /* 호버 시 변화: 절제된 움직임 */
         @media (hover: hover) { 
             .mode-card:hover { 
-                transform: translateY(-15px) scale(1.02); 
-                box-shadow: 0 25px 50px rgba(0,0,0,0.15); 
-                border-color: var(--btn-bg);
+                transform: translateY(-8px); /* 튀어나오는 정도 축소 (15px -> 8px) */
+                box-shadow: 0 15px 30px rgba(0,0,0,0.12); 
             } 
-            .mode-card:hover h2 {
-                transform: scale(1.05);
-            }
+            /* 호버 시 설명창 노출 */
             .mode-card:hover .mode-desc { 
-                opacity: 1; 
-                transform: translateY(-5px);
+                opacity: 0.7; 
+                max-height: 80px; /* 적당한 높이까지 확장 */
+                margin-top: 15px;
             }
             .mode-card:hover .start-btn { 
-                background-color: var(--text-color);
-                color: var(--bg-color);
-                letter-spacing: 1px;
-                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                filter: brightness(1.1);
             }
         }
         
-        /* 결과 화면 */
+        /* 결과 화면 및 기타 UI 생략 (동일) */
         #result-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 200; color: white; background-color: rgba(0, 0, 0, 0.75); backdrop-filter: blur(5px); }
-        #result-msg { font-size: 24px; font-weight: 800; margin-bottom: 15px; text-align: center; line-height: 1.5; padding: 0 20px; word-break: keep-all; }
-        #final-stats { font-size: 18px; margin-bottom: 30px; color: rgba(255, 255, 255, 0.9); text-align: center; }
+        #result-msg { font-size: 24px; font-weight: 800; margin-bottom: 15px; text-align: center; }
+        #final-stats { font-size: 18px; margin-bottom: 30px; text-align: center; }
         .btn-group { display: flex; gap: 15px; }
-        .result-btn { padding: 15px 30px; font-size: 16px; font-weight: bold; border-radius: 50px; border: none; cursor: pointer; transition: 0.2s; min-width: 130px; }
+        .result-btn { padding: 15px 30px; font-size: 16px; font-weight: bold; border-radius: 50px; border: none; cursor: pointer; min-width: 130px; }
         .btn-main { background-color: white; color: #333; }
         .btn-sub { background-color: rgba(255,255,255,0.2); color: white; border: 1.5px solid white; }
 
-        /* UI 레이아웃 */
-        #ui-container { position: fixed; top: 15px; left: 15px; display: none; flex-direction: column; gap: 8px; pointer-events: none; z-index: 50; }
-        #pause-btn { position: fixed; top: 20px; right: 20px; width: 30px; height: 30px; background: none; border: none; display: none; justify-content: center; align-items: center; cursor: pointer; z-index: 150; }
+        #ui-container { position: fixed; top: 15px; left: 15px; display: none; flex-direction: column; gap: 8px; z-index: 50; }
+        #pause-btn { position: fixed; top: 20px; right: 20px; width: 30px; height: 30px; background: none; border: none; display: none; justify-content: center; align-items: center; z-index: 150; }
         #pause-btn::before, #pause-btn::after { content: ''; width: 4px; height: 18px; background-color: var(--text-color); border-radius: 2px; position: absolute; }
         #pause-btn::before { left: 8px; } #pause-btn::after { right: 8px; }
-        #sound-btn { position: fixed; top: 20px; width: 30px; height: 30px; background: none; border: none; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 150; transition: right 0.3s ease; }
+        #sound-btn { position: fixed; top: 20px; width: 30px; height: 30px; background: none; border: none; display: flex; justify-content: center; align-items: center; z-index: 150; transition: right 0.3s ease; }
         .sound-at-start { right: 20px; } .sound-at-game { right: 65px; }
         #sound-icon { width: 24px; height: 24px; fill: var(--text-color); }
-        .label-text { color: var(--text-color); font-size: 15px; font-weight: bold; }
         #heart-list { display: flex; gap: 5px; }
-        .heart-unit { position: relative; width: 28px; height: 28px; background-color: var(--ui-bg); border-radius: 4px; overflow: hidden; }
+        .heart-unit { width: 28px; height: 28px; background-color: var(--ui-bg); border-radius: 4px; overflow: hidden; position: relative; }
         .heart-mask { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; transition: height 0.3s; }
         .heart-img { width: 28px; height: 28px; object-fit: contain; }
-        .stats-row { font-size: 18px; font-weight: bold; color: var(--text-color); margin-top: 2px; }
-        #control-guide { position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.1); color: var(--text-color); padding: 10px 20px; border-radius: 25px; font-size: 13px; z-index: 150; pointer-events: none; white-space: nowrap; font-weight: bold; }
+        .stats-row { font-size: 18px; font-weight: bold; margin-top: 2px; }
+        #control-guide { position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.1); padding: 10px 20px; border-radius: 25px; font-size: 13px; font-weight: bold; z-index: 150; pointer-events: none; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
-        /* 모바일 대응 */
         @media (max-width: 800px) { 
             .mode-container { flex-direction: column; gap: 15px; } 
-            .mode-card { width: 85vw; padding: 30px 20px; border-radius: 20px; } 
+            .mode-card { width: 85vw; padding: 25px 20px; } 
             #game-title { font-size: 32px; margin-bottom: 30px; } 
-            .mode-card h2 { font-size: 20px; }
-            .mode-desc { font-size: 14px; min-height: 50px; margin-bottom: 15px; }
+            /* 모바일에서는 설명창이 아예 보이게 설정하거나 클릭 시 노출 */
+            .mode-desc { opacity: 0.7; max-height: 60px; margin-top: 10px; }
         }
     </style>
 </head>
@@ -182,12 +162,12 @@
             <div class="opening-slide active">
                 <div class="opening-img-placeholder">⏱️ 생존 모드</div>
                 <h3 class="opening-title">215초를 버텨라!</h3>
-                <p class="opening-desc"><b>모드 설명:</b> 떨어지는 돌을 피해 215초를 살아남으세요.<br>파이브에 닿으면 목숨을 회복합니다! <br><br><b>클리어 조건:</b> 215초 동안 생존하세요! </p>
+                <p class="opening-desc"><b>모드 설명:</b> 떨어지는 돌을 피해 215초를 살아남으세요.<br>파이브에 닿으면 목숨을 회복합니다!</p>
             </div>
             <div class="opening-slide">
                 <div class="opening-img-placeholder">📦 구출 모드</div>
                 <h3 class="opening-title">215명의 파이브를 잡아라!</h3>
-                <p class="opening-desc"><b>모드 설명:</b> 떨어지는 돌을 피해 파이브 215명을 잡으세요.<br>파이브에 닿으면 목숨을 회복합니다! <br><br><b>클리어 조건:</b> 파이브 215명을 상자 속으로 집어 넣으세요! </p>
+                <p class="opening-desc"><b>모드 설명:</b> 파이브 215명을 상자 속으로 집어 넣으세요!</p>
             </div>
             <div class="opening-slide">
                 <div class="opening-img-placeholder">🎮 조작법</div>
@@ -207,13 +187,13 @@
         <div id="game-title">파이브와 돌</div>
         <div class="mode-container">
             <div class="mode-card" onclick="startGame('survival', event)">
-                <h2>215초를 버텨라!</h2>
-                <div class="mode-desc">215초 동안 떨어지는 돌을 피해 생존하세요!</div>
+                <h2>215초 생존</h2>
+                <div class="mode-desc">떨어지는 돌을 피해 215초 동안 생존하세요!</div>
                 <button class="start-btn">시작하기</button>
             </div>
             <div class="mode-card" onclick="startGame('catch', event)">
-                <h2>215명의 파이브를 잡아라!</h2>
-                <div class="mode-desc">돌을 피해 파이브 215명을 상자 속으로 넣으세요!</div>
+                <h2>215명 구출</h2>
+                <div class="mode-desc">돌을 피해 파이브 215명을 상자에 담으세요!</div>
                 <button class="start-btn">시작하기</button>
             </div>
         </div>
@@ -234,7 +214,6 @@
     </div>
 
     <div id="ui-container">
-        <div id="mode-label" class="label-text">목숨</div>
         <div id="heart-list"></div>
         <div class="stats-row" id="stats-text">SCORE: 0</div>
     </div>
@@ -246,9 +225,7 @@
         const ctx = canvas.getContext("2d");
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-        function getBgColor() {
-            return getComputedStyle(document.documentElement).getPropertyValue('--bg-color').trim();
-        }
+        function getBgColor() { return getComputedStyle(document.documentElement).getPropertyValue('--bg-color').trim(); }
 
         let currentSlide = 0;
         const slides = document.querySelectorAll('.opening-slide');
@@ -304,7 +281,7 @@
         const targetCatch = 215, survivalDuration = 215, targetSurvivalScore = 55555;
         let skipInput = "", isInvincible = false, continueInvincibleTimer = 0; 
 
-        document.getElementById('control-guide').innerText = isMobile ? "화면 좌/우 하단을 터치하여 움직이세요" : "키보드 방향키(← →)로 움직이세요";
+        document.getElementById('control-guide').innerText = isMobile ? "화면 좌/우 터치 이동" : "방향키(← →) 이동";
 
         let player = { x: 0, y: 0, width: isMobile ? 30 : 60, height: isMobile ? 30 : 60, speed: isMobile ? 7.5 : 16 };
 
@@ -430,13 +407,6 @@
         function spawnOneObject(type) {
             let w = isMobile ? 30 : 60, h = (type === 'item') ? (isMobile ? 40 : 80) : (isMobile ? 30 : 60);
             let xPos = Math.random() * (canvas.width - w);
-            let attempts = 0;
-            while (attempts < 5) {
-                let overlap = objects.some(o => o.y < 120 && xPos < o.x + o.width + 15 && xPos + w > o.x - 15);
-                if (!overlap) break;
-                xPos = Math.random() * (canvas.width - w);
-                attempts++;
-            }
             let baseSpeed = isMobile ? 4.5 : 6;
             let finalSpeed = Math.min(baseSpeed + (survivalTimer * 0.1), 40) + (Math.random() * 3);
             objects.push({ x: xPos, y: -h, width: w, height: h, speed: finalSpeed, type: type, img: (type === 'item') ? itemImages[Math.floor(Math.random() * itemImages.length)] : rockImg });
@@ -488,25 +458,10 @@
         function finish(victory) {
             let timeStr = `버틴 시간: ${Math.floor(survivalTimer)}초`;
             let scoreStr = "";
-            let mainMsg = "";
-
-            if (gameMode === "survival") {
-                scoreStr = `최종 점수: ${Math.floor(score)}점`;
-                mainMsg = victory ? "성공!<br>215초를 버텨냈습니다!" : "게임 오버!";
-            } else {
-                if (victory) {
-                    mainMsg = "성공!<br>215명의 파이브를 구출했습니다!";
-                    scoreStr = `잡은 파이브: 215명`;
-                } else {
-                    mainMsg = "게임 오버!";
-                    let remaining = targetCatch - Math.floor(score);
-                    if (remaining < 0) remaining = 0; 
-                    scoreStr = `남은 파이브: ${remaining}명`;
-                }
-            }
-
-            let finalStats = `${timeStr}<br>${scoreStr}`;
-            showPopup(mainMsg, finalStats, false);
+            let mainMsg = victory ? "성공!" : "게임 오버!";
+            if (gameMode === "survival") scoreStr = `최종 점수: ${Math.floor(score)}점`;
+            else scoreStr = victory ? "215명 구출 완료" : `남은 파이브: ${targetCatch - Math.floor(score)}명`;
+            showPopup(mainMsg, `${timeStr}<br>${scoreStr}`, false);
         }
 
         function draw() {
