@@ -77,38 +77,19 @@
             transition: all 0.4s ease; margin-top: 25px;
         }
 
-        /* 카드 호버/터치 시 변화 */
-        .mode-card:hover, .mode-card:active {
+        /* 카드 호버/터치 시 변화 (.active 추가) */
+        .mode-card:hover, .mode-card.active {
             background-color: #ffffff;
             box-shadow: 0 20px 40px rgba(0,0,0,0.12);
             transform: translateY(-10px);
             border-color: #eee;
         }
 
-        .mode-card:hover h2, .mode-card:active h2 { transform: translateY(-15px); }
-        .mode-card:hover .mode-desc, .mode-card:active .mode-desc { opacity: 1; transform: translateY(0); }
-        .mode-card:hover .start-btn, .mode-card:active .start-btn { opacity: 1; transform: translateY(0); }
+        .mode-card:hover h2, .mode-card.active h2 { transform: translateY(-15px); }
+        .mode-card:hover .mode-desc, .mode-card.active .mode-desc { opacity: 1; transform: translateY(0); }
+        .mode-card:hover .start-btn, .mode-card.active .start-btn { opacity: 1; transform: translateY(0); }
         .start-btn:hover { background-color: #000; }
         
-        // --- 터치 대응 로직 추가 ---
-        function toggleCard(card, event) {
-            event.stopPropagation(); // body 클릭 이벤트 전이 방지
-            const isActive = card.classList.contains('active');
-            
-            // 모든 카드의 active 제거
-            document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
-            
-            // 모바일에서 활성화되지 않은 상태에서 누르면 활성화만 시킴
-            if (!isActive) {
-                card.classList.add('active');
-            }
-        }
-
-        function clearCardSelection(event) {
-            // 배경 클릭 시 카드 닫기
-            document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
-        }
-
         /* --- 나머지 UI 스타일 --- */
         #result-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 200; color: white; background-color: rgba(30, 30, 35, 0.7); backdrop-filter: blur(5px); }
         #result-msg { font-size: 24px; font-weight: 800; margin-bottom: 15px; text-align: center; line-height: 1.5; padding: 0 20px; word-break: keep-all; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
@@ -140,14 +121,14 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @media (max-width: 700px) { 
             .mode-container { flex-direction: column; gap: 15px; } 
-            .mode-card { width: 85vw; height: auto; min-height: 180px; padding: 30px 20px; } 
-            .mode-card h2 { transform: none !important; margin-bottom: 0; }
-            /* 모바일에서는 항상 보이게 하거나 터치 시만 활성화 */
+            .mode-card { width: 85vw; height: 120px; min-height: 120px; padding: 20px; } 
+            .mode-card.active { height: 260px; } /* 모바일에서 활성화 시 높이 증가 */
+            .mode-card h2 { transform: none !important; font-size: 18px; }
             #game-title { font-size: 26px; margin-bottom: 20px; }
         }
     </style>
 </head>
-<body>
+<body onclick="clearCardSelection(event)">
     <div id="opening-overlay">
         <div id="opening-box">
             <div class="opening-slide active">
@@ -179,12 +160,12 @@
     <div id="start-screen">
         <div id="game-title">파이브와 돌</div>
         <div class="mode-container">
-            <div class="mode-card" onclick="this.querySelector('.start-btn').click()">
+            <div class="mode-card" onclick="toggleCard(this, event)">
                 <h2>215초를 버텨라!</h2>
                 <div class="mode-desc">215초 동안 떨어지는 돌을 피해 생존하세요!</div>
                 <button class="start-btn" onclick="startGame('survival', event)">시작하기</button>
             </div>
-            <div class="mode-card" onclick="this.querySelector('.start-btn').click()">
+            <div class="mode-card" onclick="toggleCard(this, event)">
                 <h2>215명의 파이브를 잡아라!</h2>
                 <div class="mode-desc">돌을 피해 파이브 215명을 상자 속으로 넣으세요!</div>
                 <button class="start-btn" onclick="startGame('catch', event)">시작하기</button>
@@ -215,6 +196,17 @@
     <canvas id="gameCanvas"></canvas>
 
     <script>
+        // --- 모바일 터치 대응 추가 로직 ---
+        function toggleCard(card, event) {
+            event.stopPropagation();
+            const isActive = card.classList.contains('active');
+            document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
+            if (!isActive) card.classList.add('active');
+        }
+        function clearCardSelection(event) {
+            document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
+        }
+
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -468,5 +460,3 @@
     </script>
 </body>
 </html>
-
-
