@@ -37,6 +37,7 @@
         body { overflow: hidden; background-color: var(--bg-color); color: var(--text-color); font-family: 'Pretendard', sans-serif; width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; transition: background-color 0.3s, color 0.3s; }
         canvas { display: block; }
 
+        /* 오프닝 팝업 */
         #opening-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(3px); display: flex; justify-content: center; align-items: center; z-index: 1000; }
         #opening-box { width: 90%; max-width: 400px; background: white; border-radius: 20px; padding: 30px; position: relative; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
         .opening-slide { display: none; min-height: 280px; flex-direction: column; }
@@ -51,20 +52,23 @@
         .nav-btn { position: absolute; top: 50%; transform: translateY(-50%); background: var(--btn-bg); color: var(--btn-text); border: none; width: 35px; height: 35px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; justify-content: center; align-items: center; opacity: 0.8; }
         #next-btn { right: -15px; } #prev-btn { left: -15px; }
 
+        /* 메인 시작 화면 - 크기 대폭 상향 */
         #start-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
-        #game-title { font-size: 32px; font-weight: 900; margin-bottom: 30px; color: var(--text-color); }
-        .mode-container { display: flex; flex-direction: row; gap: 20px; align-items: stretch; padding: 15px; }
-        .mode-card { width: 280px; background-color: var(--card-bg); border-radius: 20px; padding: 30px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); transition: all 0.3s ease; position: relative; border: 1px solid rgba(0,0,0,0.05); cursor: pointer; }
-        .mode-card h2 { margin-bottom: 15px; font-size: 20px; color: var(--text-color); text-align: center; }
-        .mode-desc { font-size: 14px; color: var(--text-color); line-height: 1.5; text-align: center; margin-bottom: 20px; opacity: 0; transform: translateY(10px); transition: 0.3s; pointer-events: none; word-break: keep-all; min-height: 60px; display: flex; align-items: center; }
-        .start-btn { width: 100%; padding: 12px; font-size: 16px; font-weight: bold; color: var(--btn-text); border: none; border-radius: 12px; background-color: var(--btn-bg); opacity: 0; transform: translateY(10px); transition: 0.3s; }
+        #game-title { font-size: 48px; font-weight: 900; margin-bottom: 50px; color: var(--text-color); letter-spacing: -1px; }
+        
+        .mode-container { display: flex; flex-direction: row; gap: 30px; align-items: stretch; padding: 20px; }
+        .mode-card { width: 350px; background-color: var(--card-bg); border-radius: 25px; padding: 45px 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 15px 35px rgba(0,0,0,0.1); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; border: 1px solid rgba(0,0,0,0.05); cursor: pointer; }
+        .mode-card h2 { margin-bottom: 20px; font-size: 24px; font-weight: 800; color: var(--text-color); text-align: center; word-break: keep-all; }
+        .mode-desc { font-size: 16px; color: var(--text-color); line-height: 1.6; text-align: center; margin-bottom: 25px; opacity: 0.7; transform: translateY(0); transition: 0.3s; word-break: keep-all; min-height: 70px; display: flex; align-items: center; }
+        .start-btn { width: 100%; padding: 16px; font-size: 18px; font-weight: bold; color: var(--btn-text); border: none; border-radius: 15px; background-color: var(--btn-bg); transition: 0.3s; cursor: pointer; }
         
         @media (hover: hover) { 
-            .mode-card:hover { transform: translateY(-5px); filter: brightness(1.05); } 
-            .mode-card:hover .mode-desc, .mode-card:hover .start-btn { opacity: 1; transform: translateY(0); pointer-events: auto; } 
+            .mode-card:hover { transform: translateY(-10px); box-shadow: 0 20px 45px rgba(0,0,0,0.15); filter: brightness(1.05); } 
+            .mode-card:hover .mode-desc { opacity: 1; }
+            .mode-card:hover .start-btn { transform: scale(1.05); }
         }
-        .mode-card.active .mode-desc, .mode-card.active .start-btn { opacity: 1; transform: translateY(0); pointer-events: auto; }
-
+        
+        /* 결과 화면 */
         #result-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 200; color: white; background-color: rgba(0, 0, 0, 0.75); backdrop-filter: blur(5px); }
         #result-msg { font-size: 24px; font-weight: 800; margin-bottom: 15px; text-align: center; line-height: 1.5; padding: 0 20px; word-break: keep-all; }
         #final-stats { font-size: 18px; margin-bottom: 30px; color: rgba(255, 255, 255, 0.9); text-align: center; }
@@ -73,6 +77,7 @@
         .btn-main { background-color: white; color: #333; }
         .btn-sub { background-color: rgba(255,255,255,0.2); color: white; border: 1.5px solid white; }
 
+        /* UI 레이아웃 */
         #ui-container { position: fixed; top: 15px; left: 15px; display: none; flex-direction: column; gap: 8px; pointer-events: none; z-index: 50; }
         #pause-btn { position: fixed; top: 20px; right: 20px; width: 30px; height: 30px; background: none; border: none; display: none; justify-content: center; align-items: center; cursor: pointer; z-index: 150; }
         #pause-btn::before, #pause-btn::after { content: ''; width: 4px; height: 18px; background-color: var(--text-color); border-radius: 2px; position: absolute; }
@@ -89,7 +94,15 @@
         #control-guide { position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.1); color: var(--text-color); padding: 10px 20px; border-radius: 25px; font-size: 13px; z-index: 150; pointer-events: none; white-space: nowrap; font-weight: bold; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @media (max-width: 700px) { .mode-container { flex-direction: column; gap: 15px; } .mode-card { width: 85vw; padding: 25px 20px; } #game-title { font-size: 26px; } }
+        
+        /* 모바일 대응 - 모바일에서는 다시 원래 크기 수준으로 조정 */
+        @media (max-width: 800px) { 
+            .mode-container { flex-direction: column; gap: 15px; } 
+            .mode-card { width: 85vw; padding: 30px 20px; border-radius: 20px; } 
+            #game-title { font-size: 32px; margin-bottom: 30px; } 
+            .mode-card h2 { font-size: 20px; }
+            .mode-desc { font-size: 14px; min-height: 50px; margin-bottom: 15px; }
+        }
     </style>
 </head>
 <body>
@@ -122,18 +135,18 @@
     <div id="start-screen">
         <div id="game-title">파이브와 돌</div>
         <div class="mode-container">
-            <div class="mode-card" onclick="handleCardClick(this)">
+            <div class="mode-card" onclick="startGame('survival', event)">
                 <h2>215초를 버텨라!</h2>
                 <div class="mode-desc">215초 동안 떨어지는 돌을 피해 생존하세요!</div>
-                <button class="start-btn" onclick="startGame('survival', event)">시작하기</button>
+                <button class="start-btn">시작하기</button>
             </div>
-            <div class="mode-card" onclick="handleCardClick(this)">
+            <div class="mode-card" onclick="startGame('catch', event)">
                 <h2>215명의 파이브를 잡아라!</h2>
                 <div class="mode-desc">돌을 피해 파이브 215명을 상자 속으로 넣으세요!</div>
-                <button class="start-btn" onclick="startGame('catch', event)">시작하기</button>
+                <button class="start-btn">시작하기</button>
             </div>
         </div>
-        <div id="control-guide">안내 문구 로딩중...</div>
+        <div id="control-guide">조작법 안내...</div>
     </div>
 
     <button id="sound-btn" class="sound-at-start" onclick="toggleSound()">
@@ -232,11 +245,6 @@
         }
         window.addEventListener('resize', resize);
         resize();
-
-        function handleCardClick(card) {
-            document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
-            card.classList.add('active');
-        }
 
         function startGame(mode, event) {
             if(event) event.stopPropagation();
@@ -420,8 +428,8 @@
                     scoreStr = `잡은 파이브: 215명`;
                 } else {
                     mainMsg = "게임 오버!";
-                    // 목표치 215에서 현재 점수를 뺀 남은 인원 계산
-                    let remaining = Math.max(0, targetCatch - Math.floor(score));
+                    let remaining = targetCatch - Math.floor(score);
+                    if (remaining < 0) remaining = 0; 
                     scoreStr = `남은 파이브: ${remaining}명`;
                 }
             }
