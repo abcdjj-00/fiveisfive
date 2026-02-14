@@ -60,12 +60,14 @@
             font-size: 22px; color: #222; text-align: center; 
             transition: transform 0.4s ease;
             word-break: keep-all; line-height: 1.3;
+            z-index: 2;
         }
 
         .mode-desc { 
             font-size: 14px; color: #666; line-height: 1.6; text-align: center; 
             margin-top: 20px; opacity: 0; transform: translateY(20px); 
             transition: all 0.4s ease; word-break: keep-all; min-height: 50px;
+            display: none; /* 모바일에서 닫혀있을 때 공간 차지 방지 */
         }
 
         .start-btn { 
@@ -73,20 +75,29 @@
             color: white; border: none; border-radius: 12px; background-color: #333; 
             cursor: pointer; opacity: 0; transform: translateY(20px);
             transition: all 0.4s ease; margin-top: 25px;
+            display: none;
         }
 
-        /* 카드 호버/터치 활성화 상태 */
-        .mode-card:hover, .mode-card.active {
+        /* 데스크톱 호버 상태 */
+        .mode-card:hover .mode-desc, .mode-card:hover .start-btn { display: block; }
+        .mode-card:hover {
             background-color: #ffffff;
             box-shadow: 0 20px 40px rgba(0,0,0,0.12);
             transform: translateY(-10px);
             border-color: #eee;
         }
+        .mode-card:hover h2 { transform: translateY(-15px); }
+        .mode-card:hover .mode-desc { opacity: 1; transform: translateY(0); }
+        .mode-card:hover .start-btn { opacity: 1; transform: translateY(0); }
 
-        .mode-card:hover h2, .mode-card.active h2 { transform: translateY(-15px); }
-        .mode-card:hover .mode-desc, .mode-card.active .mode-desc { opacity: 1; transform: translateY(0); }
-        .mode-card:hover .start-btn, .mode-card.active .start-btn { opacity: 1; transform: translateY(0); }
-        .start-btn:hover { background-color: #000; }
+        /* 활성화 상태 (모바일 터치용) */
+        .mode-card.active {
+            background-color: #ffffff;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+            border-color: #eee;
+        }
+        .mode-card.active h2 { transform: translateY(-10px); }
+        .mode-card.active .mode-desc, .mode-card.active .start-btn { display: block; opacity: 1; transform: translateY(0); }
         
         /* --- 나머지 UI 스타일 --- */
         #result-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 200; color: white; background-color: rgba(30, 30, 35, 0.7); backdrop-filter: blur(5px); }
@@ -118,14 +129,13 @@
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* 모바일용 보정: 평상시 높이 80px로 모드 제목만 보이게 설정 */
+        /* 모바일용 레이아웃 수정 */
         @media (max-width: 700px) { 
-            .mode-container { flex-direction: column; gap: 15px; } 
-            .mode-card { width: 85vw; height: 80px; min-height: 80px; padding: 0 20px; justify-content: center; } 
-            .mode-card.active { height: 280px; padding: 40px 20px; }
-            .mode-card h2 { transform: none !important; font-size: 18px; margin: 0; }
-            .mode-card.active h2 { transform: translateY(-10px) !important; }
-            #game-title { font-size: 26px; margin-bottom: 20px; }
+            .mode-container { flex-direction: column; gap: 12px; width: 90%; } 
+            .mode-card { width: 100%; height: 90px; min-height: 90px; padding: 0 20px; justify-content: center; transform: none !important; } 
+            .mode-card.active { height: 260px; padding: 30px 20px; }
+            .mode-card h2 { font-size: 18px; margin: 0; display: block; opacity: 1 !important; visibility: visible !important; }
+            #game-title { font-size: 26px; margin-bottom: 25px; }
         }
     </style>
 </head>
