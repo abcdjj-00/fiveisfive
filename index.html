@@ -242,11 +242,10 @@
         function loadImg(src) { const img = new Image(); img.src = src; return img; }
         const playerImg = loadImg('box.png'); 
 
-        // [수정] 파이브 이미지 배열 (3.5.png 추가)
         const itemImages = [
             loadImg('1.5p.jpg'), 
             loadImg('2.5p.jpg'), 
-            loadImg('3.5.png'), // 여기에 추가됨
+            loadImg('3.5.png'),
             loadImg('4.5.png'), 
             loadImg('5.5.png'),
             loadImg('6.5.png'),
@@ -255,8 +254,6 @@
         ];
 
         const rockImg = loadImg('s.png');
-        
-        // [수정] 목숨 UI 아이콘을 main.png로 변경
         const heartImgSrc = 'main.png'; 
 
         let lives = 3, heartPieces = 0, score = 0, isGameOver = false, isWin = false, isStarted = false, isPaused = false;
@@ -321,8 +318,14 @@
         function updateUI() {
             const list = document.getElementById('heart-list');
             list.innerHTML = '';
+            // 현재 모드에 따른 하트 충전 필요 개수 설정 (잡기 10, 생존 5)
+            const threshold = (gameMode === "catch") ? 10 : 5;
+            
             for (let i = 0; i < lives; i++) addHeartToUI(100);
-            if (lives < 10 && (heartPieces > 0 || lives === 0)) addHeartToUI((heartPieces / 5) * 100);
+            if (lives < 10 && (heartPieces > 0 || lives === 0)) {
+                addHeartToUI((heartPieces / threshold) * 100);
+            }
+            
             const scoreDisplay = Math.floor(score);
             const statsText = document.getElementById('stats-text');
             if (gameMode === "survival") statsText.innerHTML = `SCORE: ${scoreDisplay}`;
@@ -379,6 +382,7 @@
             if (!isStarted || isGameOver || isWin || isPaused) return;
             if (continueInvincibleTimer > 0) continueInvincibleTimer -= deltaTime / 1000;
             survivalTimer += deltaTime / 1000; 
+            
             if (gameMode === "survival") {
                 if (!isContinued) {
                     score = (targetSurvivalScore / survivalDuration) * survivalTimer;
@@ -387,15 +391,31 @@
             } else {
                 if (!isContinued && score >= targetCatch) { score = targetCatch; isWin = true; stopSound(hitSound); setTimeout(() => playSound(winSound), 50); finish(true); return; }
             }
+            
             updateUI();
+            
             if ((keys["ArrowLeft"] || moveLeft) && player.x > 0) player.x -= player.speed;
             if ((keys["ArrowRight"] || moveRight) && player.x < canvas.width - player.width) player.x += player.speed;
+            
             createObject();
+            
             for (let i = objects.length - 1; i >= 0; i--) {
                 let o = objects[i]; o.y += o.speed;
                 let pad = isMobile ? 8 : 12;
                 if (o.x < player.x + player.width - pad && o.x + o.width > player.x + pad && o.y < player.y + player.height - pad && o.y + o.height > player.y + pad) {
-                    if (o.type === 'item') { playSound(hitSound); heartPieces++; score++; if (heartPieces >= 5) { if (lives < 10) lives++; heartPieces = 0; } }
+                    if (o.type === 'item') { 
+                        playSound(hitSound); 
+                        heartPieces++; 
+                        score++; 
+                        
+                        // [수정] 모드에 따라 목숨이 차는 기준 설정
+                        const threshold = (gameMode === "catch") ? 10 : 5;
+                        
+                        if (heartPieces >= threshold) { 
+                            if (lives < 10) lives++; 
+                            heartPieces = 0; 
+                        } 
+                    }
                     else if (!isInvincible && continueInvincibleTimer <= 0) { 
                         lives--; 
                         if (lives <= 0) { isGameOver = true; stopSound(hitSound); setTimeout(() => playSound(gameOverSound), 50); finish(false); } 
@@ -434,4 +454,3 @@
     </script>
 </body>
 </html>
-
