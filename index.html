@@ -222,7 +222,7 @@
             if (isMobile) {
                 descContent.innerHTML = "<b>모바일:</b> 화면 하단 좌/우 영역을 터치하여 움직입니다.";
             } else {
-                descContent.innerHTML = "<b>PC 조작:</b> 방향키 (←, →)를 이용해 상자를 움직입니다.<br><br><b>단축키:</b> 'S' 키를 눌러 게임을 멈추거나 이어할 수 있습니다.";
+                descContent.innerHTML = "<b>PC 조작:</b> 방향키 (←, →)를 이용해 상자를 움직입니다.<br><br><b>단축키:</b> 'S' 키를 눌러 게임을 멈추거나 이어할 수 있습니다."; <br><br><br>
             }
 
             if (sessionStorage.getItem('hideOpening') === 'true') {
@@ -278,7 +278,7 @@
         const targetCatch = 215, survivalDuration = 215, targetSurvivalScore = 55555;
         let skipInput = "", isInvincible = false, continueInvincibleTimer = 0; 
 
-        document.getElementById('control-guide').innerText = isMobile ? "화면 좌/우 하단을 터치하여 움직이세요" : "방향키: 이동 / S: 일시정지";
+        document.getElementById('control-guide').innerText = isMobile ? "화면 좌/우 하단을 터치하여 움직이세요" : "방향키 (←, →)를 이용해 상자를 움직입니다.";
 
         let player = { x: 0, y: 0, width: isMobile ? 30 : 60, height: isMobile ? 30 : 60, speed: isMobile ? 7.5 : 16 };
 
@@ -479,3 +479,4 @@
     </script>
 </body>
 </html>
+
