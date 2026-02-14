@@ -15,7 +15,7 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(3px);
-            display: flex; justify-content: center; align-items: center; z-index: 1000;
+            display: flex; justify-content: center; align-items: center; z-index: 2000; /* 더 높은 우선순위 */
         }
         #opening-box {
             width: 90%; max-width: 400px; background: white; border-radius: 20px;
@@ -28,8 +28,11 @@
         .opening-title { font-size: 20px; font-weight: bold; margin-bottom: 15px; color: #222; }
         .opening-desc { font-size: 14px; color: #555; line-height: 1.6; text-align: left; }
 
+        /* [수정] 조작방법 창에서 버튼 위 3줄 공백을 위한 스타일 */
+        .spacer { margin-bottom: 3.6em; } 
+
         .opening-footer { display: flex; gap: 10px; margin-top: 20px; }
-        .op-btn { flex: 1; padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; border: none; font-size: 14px; }
+        .op-btn { flex: 1; padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; border: none; font-size: 14px; z-index: 2001; }
         #close-opening { background: #eee; color: #333; }
         #never-show-opening { background: #444; color: white; }
 
@@ -37,7 +40,7 @@
             position: absolute; top: 50%; transform: translateY(-50%);
             background: #333; color: white; border: none; width: 35px; height: 35px; border-radius: 50%;
             font-size: 18px; cursor: pointer; display: flex; justify-content: center; align-items: center;
-            opacity: 0.8;
+            opacity: 0.8; z-index: 2100;
         }
         #next-btn { right: -15px; }
         #prev-btn { left: -15px; }
@@ -137,7 +140,7 @@
 </head>
 <body onclick="clearCardSelection(event)">
     <div id="opening-overlay">
-        <div id="opening-box">
+        <div id="opening-box" onclick="event.stopPropagation()">
             <div class="opening-slide active">
                 <img src="survive.png" alt="생존 모드" class="opening-img">
                 <h3 class="opening-title">215초를 버텨라!</h3>
@@ -151,13 +154,14 @@
             <div class="opening-slide no-img-slide">
                 <h3 class="opening-title">🎮 조작 방법</h3>
                 <p class="opening-desc" id="control-desc-content"></p>
+                <div class="spacer"></div>
                 <div class="opening-footer">
                     <button id="close-opening" class="op-btn" onclick="closeOpening(false)">닫기</button>
                     <button id="never-show-opening" class="op-btn" onclick="closeOpening(true)">다시 보지 않기</button>
                 </div>
             </div>
-            <button id="prev-btn" class="nav-btn" onclick="changeSlide(-1)" style="display:none;">❮</button>
-            <button id="next-btn" class="nav-btn" onclick="changeSlide(1)">❯</button>
+            <button id="prev-btn" class="nav-btn" onclick="changeSlide(-1, event)" style="display:none;">❮</button>
+            <button id="next-btn" class="nav-btn" onclick="changeSlide(1, event)">❯</button>
         </div>
     </div>
 
@@ -200,29 +204,31 @@
     <canvas id="gameCanvas"></canvas>
 
     <script>
-        function toggleCard(card, event) {
-            event.stopPropagation();
-            const isActive = card.classList.contains('active');
-            document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
-            if (!isActive) card.classList.add('active');
-        }
-        function clearCardSelection(event) {
-            if (!event.target.closest('.mode-card')) {
-                document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
-            }
-        }
-
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-        // [수정] PC/모바일에 따른 조작방법 설명 텍스트 업데이트
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.opening-slide');
+
+        // [수정] 슬라이드 변경 함수를 더 안전하게 수정
+        function changeSlide(n, event) {
+            if(event) event.stopPropagation(); // 이벤트 버블링 방지
+            
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + n + slides.length) % slides.length;
+            slides[currentSlide].classList.add('active');
+            
+            document.getElementById('prev-btn').style.display = (currentSlide === 0) ? 'none' : 'flex';
+            document.getElementById('next-btn').style.display = (currentSlide === slides.length - 1) ? 'none' : 'flex';
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             const descContent = document.getElementById('control-desc-content');
             if (isMobile) {
                 descContent.innerHTML = "<b>모바일:</b> 화면 하단 좌/우 영역을 터치하여 움직입니다.";
             } else {
-                descContent.innerHTML = "<b>PC 조작:</b> 방향키 (←, →)를 이용해 상자를 움직입니다.<br><br><b>단축키:</b> 'S' 키를 눌러 게임을 멈추거나 이어할 수 있습니다."; <br><br><br>
+                descContent.innerHTML = "<b>PC 조작:</b> 방향키 (←, →)를 이용해 상자를 움직입니다.<br><br><b>단축키:</b> 'S' 키를 눌러 게임을 멈추거나 이어할 수 있습니다.";
             }
 
             if (sessionStorage.getItem('hideOpening') === 'true') {
@@ -230,15 +236,16 @@
             }
         });
 
-        let currentSlide = 0;
-        const slides = document.querySelectorAll('.opening-slide');
-        
-        function changeSlide(n) {
-            slides[currentSlide].classList.remove('active');
-            currentSlide = (currentSlide + n + slides.length) % slides.length;
-            slides[currentSlide].classList.add('active');
-            document.getElementById('prev-btn').style.display = (currentSlide === 0) ? 'none' : 'flex';
-            document.getElementById('next-btn').style.display = (currentSlide === slides.length - 1) ? 'none' : 'flex';
+        function toggleCard(card, event) {
+            event.stopPropagation();
+            const isActive = card.classList.contains('active');
+            document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
+            if (!isActive) card.classList.add('active');
+        }
+        function clearCardSelection(event) {
+            if (!event.target.closest('.mode-card') && !event.target.closest('#opening-box')) {
+                document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
+            }
         }
 
         function closeOpening(neverShowAgain) {
@@ -246,14 +253,13 @@
             document.getElementById('opening-overlay').style.display = 'none';
         }
 
+        // --- 사운드 및 게임 엔진 로직 (변경 없음) ---
         let isMuted = false;
         const hitSound = new Audio('25.mp3');
         const gameOverSound = new Audio('2s.mp3');
         const winSound = new Audio('15.mp3');
-
         function playSound(sound) { if (isMuted) return; sound.currentTime = 0; sound.play().catch(e => {}); }
         function stopSound(sound) { sound.pause(); sound.currentTime = 0; }
-
         function toggleSound() {
             isMuted = !isMuted;
             const icon = document.getElementById('sound-icon');
@@ -278,7 +284,7 @@
         const targetCatch = 215, survivalDuration = 215, targetSurvivalScore = 55555;
         let skipInput = "", isInvincible = false, continueInvincibleTimer = 0; 
 
-        document.getElementById('control-guide').innerText = isMobile ? "화면 좌/우 하단을 터치하여 움직이세요" : "방향키 (←, →)를 이용해 상자를 움직입니다.";
+        document.getElementById('control-guide').innerText = isMobile ? "화면 좌/우 하단을 터치하여 움직이세요" : "방향키 (←, →)를 이용해 상자를 움직이세요.";
 
         let player = { x: 0, y: 0, width: isMobile ? 30 : 60, height: isMobile ? 30 : 60, speed: isMobile ? 7.5 : 16 };
 
@@ -296,35 +302,25 @@
             lives = 3; heartPieces = 0; score = 0; survivalTimer = 0;
             objects = []; continueInvincibleTimer = 0; isInvincible = false;
             gameMode = mode;
-            
             document.getElementById("start-screen").style.display = "none";
             document.getElementById("result-screen").style.display = "none";
             document.getElementById("ui-container").style.display = "flex";
             document.getElementById("pause-btn").style.display = "flex";
-            
             const sBtn = document.getElementById("sound-btn");
-            sBtn.classList.remove("sound-at-start");
-            sBtn.classList.add("sound-at-game");
-
+            sBtn.classList.remove("sound-at-start"); sBtn.classList.add("sound-at-game");
             isStarted = true; isGameOver = false; isWin = false; isContinued = false; isPaused = false;
-            updateUI();
-            lastTime = performance.now();
-            requestAnimationFrame(gameLoop);
+            updateUI(); lastTime = performance.now(); requestAnimationFrame(gameLoop);
         }
 
         function pauseGame() {
             if (!isStarted || isGameOver || isWin || isPaused) return;
-            isPaused = true;
-            showPopup("잠시 멈춤", "", true);
+            isPaused = true; showPopup("잠시 멈춤", "", true);
         }
 
         function continueGame() {
             isWin = false; isGameOver = false; isPaused = false;
-            isContinued = true; 
-            document.getElementById("result-screen").style.display = "none";
-            continueInvincibleTimer = 3; 
-            lastTime = performance.now();
-            requestAnimationFrame(gameLoop);
+            isContinued = true; document.getElementById("result-screen").style.display = "none";
+            continueInvincibleTimer = 3; lastTime = performance.now(); requestAnimationFrame(gameLoop);
         }
 
         function showPopup(msg, stats, isPauseMode) {
@@ -332,25 +328,13 @@
             const btnGroup = document.getElementById("result-btns");
             document.getElementById("result-msg").innerHTML = msg;
             document.getElementById("final-stats").innerHTML = stats;
-            
             btnGroup.innerHTML = '';
-            const mainBtn = document.createElement("button");
-            mainBtn.className = "result-btn btn-main";
-            const subBtn = document.createElement("button");
-            subBtn.className = "result-btn btn-sub";
-            subBtn.innerText = "모드선택";
-            subBtn.onclick = () => location.reload();
-
-            if (isPauseMode || isWin) {
-                mainBtn.innerText = "이어하기";
-                mainBtn.onclick = () => continueGame();
-            } else {
-                mainBtn.innerText = "다시하기";
-                mainBtn.onclick = () => startGame(gameMode);
-            }
-            btnGroup.appendChild(mainBtn);
-            btnGroup.appendChild(subBtn);
-            screen.style.display = "flex";
+            const mainBtn = document.createElement("button"); mainBtn.className = "result-btn btn-main";
+            const subBtn = document.createElement("button"); subBtn.className = "result-btn btn-sub";
+            subBtn.innerText = "모드선택"; subBtn.onclick = () => location.reload();
+            if (isPauseMode || isWin) { mainBtn.innerText = "이어하기"; mainBtn.onclick = () => continueGame(); }
+            else { mainBtn.innerText = "다시하기"; mainBtn.onclick = () => startGame(gameMode); }
+            btnGroup.appendChild(mainBtn); btnGroup.appendChild(subBtn); screen.style.display = "flex";
         }
 
         function updateUI() {
@@ -358,7 +342,6 @@
             list.innerHTML = '';
             for (let i = 0; i < lives; i++) addHeartToUI(100);
             if (lives < 10 && (heartPieces > 0 || lives === 0)) addHeartToUI((heartPieces / 5) * 100);
-
             const scoreDisplay = Math.floor(score);
             const statsText = document.getElementById('stats-text');
             if (gameMode === "survival") statsText.innerHTML = `SCORE: ${scoreDisplay}`;
@@ -376,16 +359,9 @@
 
         window.addEventListener("keydown", (e) => {
             keys[e.code] = true;
-            
-            // [수정] S키 단축키 로직 추가
             if (e.key.toLowerCase() === 's' && isStarted && !isGameOver && !isWin) {
-                if (isPaused) {
-                    continueGame();
-                } else {
-                    pauseGame();
-                }
+                if (isPaused) continueGame(); else pauseGame();
             }
-
             if (isStarted && !isGameOver && !isPaused) {
                 skipInput += e.key.toLowerCase();
                 if (skipInput.endsWith("skip")) {
@@ -421,7 +397,6 @@
             if (!isStarted || isGameOver || isWin || isPaused) return;
             if (continueInvincibleTimer > 0) continueInvincibleTimer -= deltaTime / 1000;
             survivalTimer += deltaTime / 1000; 
-
             if (gameMode === "survival") {
                 if (!isContinued) {
                     score = (targetSurvivalScore / survivalDuration) * survivalTimer;
@@ -430,11 +405,9 @@
             } else {
                 if (!isContinued && score >= targetCatch) { score = targetCatch; isWin = true; stopSound(hitSound); setTimeout(() => playSound(winSound), 50); finish(true); return; }
             }
-
             updateUI();
             if ((keys["ArrowLeft"] || moveLeft) && player.x > 0) player.x -= player.speed;
             if ((keys["ArrowRight"] || moveRight) && player.x < canvas.width - player.width) player.x += player.speed;
-
             createObject();
             for (let i = objects.length - 1; i >= 0; i--) {
                 let o = objects[i]; o.y += o.speed;
@@ -479,4 +452,3 @@
     </script>
 </body>
 </html>
-
